@@ -23,14 +23,14 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   string public constant symbol = 'TRST2';
   string public constant version = 'TRST2.0';
   uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
-  address public constant oldToken = 0; // Address of our old Trustcoin token contract (replace with old token address)
+  address public constant oldToken = 0; // @todo replace with real token address
   bool public allowIncomingMigrations = true; // Is set to false when we finalize migration
   uint256 public allowOutgoingMigrationsUntil; // Allows us to set a 'deadline' for migrating old tokens
 
-  mapping(address => uint256) public balances; // (ERC20)
+  mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
 
-  event MigrationFinalized();
+  event IncomingMigrationFinalized();
 
   modifier onlyFromOldToken() {
     if (msg.sender != oldToken) throw;
@@ -94,11 +94,12 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   }
 
   // Ends the possibility for any more tokens to be migrated from the old contract
-  // to the new one
-  function finalizeMigration() onlyFromOldToken external {
+  // to the new one. It's not strictly necessary to have our own flag for whether
+  // migrations are permitted or not, but it helps the token contract be self-contained
+  function finalizeIncomingMigration() onlyFromOldToken external {
     if (!allowIncomingMigrations) throw;
     allowIncomingMigrations = false;
-    MigrationFinalized();
+    IncomingMigrationFinalized();
   }
 
 }

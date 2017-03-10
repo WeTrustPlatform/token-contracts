@@ -25,11 +25,11 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   address public newTokenAddress; // Address of the new token contract
   uint256 public allowOutgoingMigrationsUntilAtLeast;
+  address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
-  mapping(address => uint256) public balances; // (ERC20)
+  mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
 
-  address public migrationMaster; // The Ethereum address which is allowed to set the new token
 
   modifier onlyFromMigrationMaster() {
     if (msg.sender != migrationMaster) throw;
@@ -85,16 +85,16 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   //
 
   /// Changes the owner for the migration behaviour
-  /// @param _master Address of the migration controller
+  /// @param _master Address of the user who has control of setting the new token's address
   function changeMigrationMaster(address _master) onlyFromMigrationMaster external {
     if (_master == 0) throw;
     migrationMaster = _master;
   }
 
-  function preventFurtherMigrations() onlyFromMigrationMaster external {
+  function finalizeOutgoingMigration() onlyFromMigrationMaster external {
     if (newTokenAddress == 0) throw;
     if (now < allowOutgoingMigrationsUntilAtLeast) throw;
-    IncomingMigrationTokenInterface(newTokenAddress).finalizeMigration();
+    IncomingMigrationTokenInterface(newTokenAddress).finalizeIncomingMigration();
   }
   
   // See OutgoingMigrationTokenInterface
