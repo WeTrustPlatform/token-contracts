@@ -114,10 +114,8 @@ contract ExampleTrustcoin2 is MigratableTokenInterface, MigratedTokenInterface, 
     OutgoingMigration(msg.sender, _value);
   }
 
-  /**
-   *  Ends the possibility for any more tokens to be migrated from the old contract
-   *  to the new one
-   */
+  // Ends the possibility for any more tokens to be migrated from the old contract
+  // to the new one
   function finalizeMigration() onlyFromMigrationMaster(msg.sender) external {
     if (!allowIncomingMigrations) throw;
     allowIncomingMigrations = false;
