@@ -20,10 +20,11 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint8 public constant decimals = 18; // Same as ETH
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
-  uint256 public constant migrationTimeLimit = 26 weeks;
+  uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
   uint256 public totalSupply = 100000000; // One hundred million (ERC20)
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   address public newTokenAddress; // Address of the new token contract
+  IncomingMigrationTokenInterface public newToken;
   uint256 public allowOutgoingMigrationsUntilAtLeast;
   bool public allowOutgoingMigrations = false;
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
@@ -44,7 +45,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
-  function transfer(address _to, uint256 _value) external returns (bool success) {
+  function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
       balances[_to] += _value;
@@ -55,7 +56,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
-  function transferFrom(address _from, address _to, uint256 _value) external returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
@@ -67,19 +68,19 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
-  function balanceOf(address _owner) constant external returns (uint256 balance) {
+  function balanceOf(address _owner) constant external returns (uint256) {
     return balances[_owner];
   }
 
   // See ERC20
-  function approve(address _spender, uint256 _value) external returns (bool success) {
+  function approve(address _spender, uint256 _value) external returns (bool) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
     return true;
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) constant external returns (uint256) {
     return allowed[_owner][_spender];
   }
 
@@ -97,31 +98,29 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See OutgoingMigrationTokenInterface
   function finalizeOutgoingMigration() onlyFromMigrationMaster external {
-    if (newTokenAddress == 0) throw;
+    if (!allowOutgoingMigrations) throw;
     if (now < allowOutgoingMigrationsUntilAtLeast) throw;
-    IncomingMigrationTokenInterface(newTokenAddress).finalizeIncomingMigration();
+    newToken.finalizeIncomingMigration();
     allowOutgoingMigrations = false;
   }
   
   // See OutgoingMigrationTokenInterface
-  function setNewTokenAddress(address _newTokenAddress) onlyFromMigrationMaster external {
-    if (newTokenAddress != 0) throw; // Ensure we haven't already set the new token
+  function beginMigrationPeriod(address _newTokenAddress) onlyFromMigrationMaster external {
+    if (allowOutgoingMigrations) throw; // Ensure we haven't already started allowing migrations
     if (_newTokenAddress == 0) throw;
-    newTokenAddress = _newTokenAddress;
-    allowOutgoingMigrationsUntilAtLeast = (now + migrationTimeLimit); // Allow migrations for at least the next six months
+    newToken = IncomingMigrationTokenInterface(_newTokenAddress);
+    allowOutgoingMigrationsUntilAtLeast = (now + minimumMigrationDuration);
     allowOutgoingMigrations = true;
   }
 
   // See OutgoingMigrationTokenInterface
-  function outgoingMigration(uint256 _value) external {
-    if (newTokenAddress == 0) throw; // Ensure that we have set the new token
+  function migrateToNewContract(uint256 _value) external {
     if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
-    if (_value > balances[msg.sender]) throw;
     balances[msg.sender] = safeSub(balances[msg.sender], _value);
     totalSupply = safeSub(totalSupply, _value);
     totalMigrated = safeAdd(totalMigrated, _value);
-    IncomingMigrationTokenInterface(newTokenAddress).incomingMigration(msg.sender, _value);
+    newToken.incomingMigration(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
   }
 

@@ -36,10 +36,8 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
     _;
   }
 
-  function Trustcoin2() {}
-
   // See ERC20
-  function transfer(address _to, uint256 _value) external returns (bool success) {
+  function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
       balances[_to] += _value;
@@ -50,7 +48,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   }
 
   // See ERC20
-  function transferFrom(address _from, address _to, uint256 _value) external returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
@@ -62,19 +60,19 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   }
 
   // See ERC20
-  function balanceOf(address _owner) constant external returns (uint256 balance) {
+  function balanceOf(address _owner) constant external returns (uint256) {
     return balances[_owner];
   }
 
   // See ERC20
-  function approve(address _spender, uint256 _value) external returns (bool success) {
+  function approve(address _spender, uint256 _value) external returns (bool) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
     return true;
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) constant external returns (uint256) {
     return allowed[_owner][_spender];
   }
 
@@ -83,7 +81,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   //
 
   // See IncomingMigrationTokenInterface
-  function incomingMigration(address _from, uint256 _value) onlyFromOldToken external {
+  function migrateFromOldContract(address _from, uint256 _value) onlyFromOldToken external {
     if (!allowIncomingMigrations) throw;
     if (_value == 0) throw;
     totalSupply = safeAdd(totalSupply, _value);
