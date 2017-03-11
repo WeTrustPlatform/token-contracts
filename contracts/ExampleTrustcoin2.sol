@@ -25,7 +25,6 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
   address public constant oldToken = 0; // @todo replace with real token address
   bool public allowIncomingMigrations = true; // Is set to false when we finalize migration
-  uint256 public allowOutgoingMigrationsUntil; // Allows us to set a 'deadline' for migrating old tokens
 
   mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
@@ -37,46 +36,45 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
     _;
   }
 
-  function Trustcoin2(address _migrationMaster) {
-    if (_migrationMaster == 0) throw;
-    migrationMaster = _migrationMaster;
-  }
+  function Trustcoin2() {}
 
   // See ERC20
-  function transfer(address _to, uint256 _value) returns (bool success) {
+  function transfer(address _to, uint256 _value) external returns (bool success) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
       balances[_to] += _value;
       Transfer(msg.sender, _to, _value);
       return true;
-    } else { return false; }
+    }
+    return false;
   }
 
   // See ERC20
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) external returns (bool success) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= _value;
       Transfer(_from, _to, _value);
       return true;
-    } else { return false; }
+    }
+    return false;
   }
 
   // See ERC20
-  function balanceOf(address _owner) constant returns (uint256 balance) {
+  function balanceOf(address _owner) constant external returns (uint256 balance) {
     return balances[_owner];
   }
 
   // See ERC20
-  function approve(address _spender, uint256 _value) returns (bool success) {
+  function approve(address _spender, uint256 _value) external returns (bool success) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
     return true;
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
 
@@ -93,9 +91,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
     IncomingMigration(_from, _value);
   }
 
-  // Ends the possibility for any more tokens to be migrated from the old contract
-  // to the new one. It's not strictly necessary to have our own flag for whether
-  // migrations are permitted or not, but it helps the token contract be self-contained
+  // See IncomingMigrationTokenInterface
   function finalizeIncomingMigration() onlyFromOldToken external {
     if (!allowIncomingMigrations) throw;
     allowIncomingMigrations = false;

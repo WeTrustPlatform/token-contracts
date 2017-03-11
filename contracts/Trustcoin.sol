@@ -25,6 +25,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   address public newTokenAddress; // Address of the new token contract
   uint256 public allowOutgoingMigrationsUntilAtLeast;
+  bool public allowOutgoingMigrations = false;
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
   mapping (address => uint256) public balances; // (ERC20)
@@ -42,40 +43,42 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
-  function transfer(address _to, uint256 _value) returns (bool success) {
+  function transfer(address _to, uint256 _value) external returns (bool success) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
       balances[_to] += _value;
       Transfer(msg.sender, _to, _value);
       return true;
-    } else { return false; }
+    } 
+    return false;
   }
 
   // See ERC20
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) external returns (bool success) {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= _value;
       Transfer(_from, _to, _value);
       return true;
-    } else { return false; }
+    }
+    return false;
   }
 
   // See ERC20
-  function balanceOf(address _owner) constant returns (uint256 balance) {
+  function balanceOf(address _owner) constant external returns (uint256 balance) {
     return balances[_owner];
   }
 
   // See ERC20
-  function approve(address _spender, uint256 _value) returns (bool success) {
+  function approve(address _spender, uint256 _value) external returns (bool success) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
     return true;
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
 
@@ -91,10 +94,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     migrationMaster = _master;
   }
 
+  // See OutgoingMigrationTokenInterface
   function finalizeOutgoingMigration() onlyFromMigrationMaster external {
     if (newTokenAddress == 0) throw;
     if (now < allowOutgoingMigrationsUntilAtLeast) throw;
     IncomingMigrationTokenInterface(newTokenAddress).finalizeIncomingMigration();
+    allowOutgoingMigrations = false;
   }
   
   // See OutgoingMigrationTokenInterface
@@ -103,11 +108,13 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     if (_newTokenAddress == 0) throw;
     newTokenAddress = _newTokenAddress;
     allowOutgoingMigrationsUntilAtLeast = (now + migrationTimeLimit); // Allow migrations for at least the next six months
+    allowOutgoingMigrations = true;
   }
 
   // See OutgoingMigrationTokenInterface
   function outgoingMigration(uint256 _value) external {
     if (newTokenAddress == 0) throw; // Ensure that we have set the new token
+    if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
     if (_value > balances[msg.sender]) throw;
     balances[msg.sender] = safeSub(balances[msg.sender], _value);
