@@ -40,6 +40,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   function Trustcoin(address _migrationMaster) {
     if (_migrationMaster == 0) throw;
     migrationMaster = _migrationMaster;
+    balances[msg.sender] = totalSupply;
   }
 
   // See ERC20
