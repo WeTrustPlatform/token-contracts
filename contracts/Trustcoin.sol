@@ -23,7 +23,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
   uint256 public totalSupply = 100000000; // One hundred million (ERC20)
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
-  address public newTokenAddress; // Address of the new token contract
   IncomingMigrationTokenInterface public newToken;
   uint256 public allowOutgoingMigrationsUntilAtLeast;
   bool public allowOutgoingMigrations = false;
