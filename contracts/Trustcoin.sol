@@ -21,7 +21,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
-  uint256 public totalSupply = 100000000; // One hundred million (ERC20)
+  uint256 public totalSupply = 100000000 * (10 ** decimals); // One hundred million (ERC20)
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   address public newTokenAddress; // Address of the new token contract
   IncomingMigrationTokenInterface public newToken;
@@ -31,7 +31,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
-
 
   modifier onlyFromMigrationMaster() {
     if (msg.sender != migrationMaster) throw;
