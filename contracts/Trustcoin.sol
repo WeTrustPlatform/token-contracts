@@ -17,7 +17,7 @@ import './deps/IncomingMigrationTokenInterface.sol';
 contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
 
   string public constant name = 'Trustcoin';
-  uint8 public constant decimals = 18; // Same as ETH
+  uint8 public constant decimals = 6;
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
