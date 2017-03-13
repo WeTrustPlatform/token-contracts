@@ -19,7 +19,7 @@ import './Trustcoin.sol';
 contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
 
   string public constant name = 'Trustcoin2';
-  uint8 public constant decimals = 18; // Same as ETH
+  uint8 public constant decimals = 6;
   string public constant symbol = 'TRST2';
   string public constant version = 'TRST2.0';
   uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
