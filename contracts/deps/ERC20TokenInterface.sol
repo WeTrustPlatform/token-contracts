@@ -16,7 +16,7 @@ contract ERC20TokenInterface {
     function by the compiler.
     */
     /// total amount of tokens
-    uint256 public totalSupply;
+    function totalSupply() external returns (uint256 balance);
 
     /// @param _owner The address from which the balance will be retrieved
     /// @return The balance

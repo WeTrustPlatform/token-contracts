@@ -1,6 +1,6 @@
 'use strict'
 
-let Trustcoin = artifacts.require("./Trustcoin.sol")
+// let Trustcoin = artifacts.require("./Trustcoin.sol")
 
 let Promise = require("bluebird")
 let co = require("co").wrap
@@ -13,7 +13,7 @@ contract("Status immediately post-deployment", function(accounts_) {
   it("should put 100000000 (one hundred million) Trustcoin in the first account", co(function* () {
     let trst = yield utils.deployTrustcoin(accounts_[0], accounts_[1])
     let balance = yield trst.balanceOf.call(accounts_[0])
-    return assert.equal(balance.valueOf(), 100000000, "100000000 wasn't in the first account")
+    return assert.equal(balance.valueOf(), 100000000 * 1e6, "100000000 wasn't in the first account")
   }))
 
   it("should have the correct metadata", co(function* () {
@@ -23,7 +23,7 @@ contract("Status immediately post-deployment", function(accounts_) {
     let symbol = yield trst.symbol.call()
     let version = yield trst.version.call()
     assert.equal(name, 'Trustcoin', "Trustcoin wasn't the found name")
-    assert.equal(decimals, 18, "18 wasn't the found number of decimals")
+    assert.equal(decimals, 6, "6 wasn't the found number of decimals")
     assert.equal(symbol, 'TRST', "TRST wasn't the found symbol")
     assert.equal(version, 'TRST1.0', "TRST1.0 wasn't the found version")
   }))
@@ -49,7 +49,7 @@ contract("Status immediately post-deployment", function(accounts_) {
   it("should have 100000000 (one hundred million) total tokens", co(function* () {
     let trst = yield utils.deployTrustcoin(accounts_[0], accounts_[1])
     let totalSupply = yield trst.totalSupply.call()
-    assert.equal(totalSupply, 100000000, "Total supply is not 100000000")
+    assert.equal(totalSupply, 100000000 * 1e6, "Total supply is not 100000000")
   }))
 
   it("should have no tokens migrated yet", co(function* () {

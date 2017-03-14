@@ -1,6 +1,6 @@
 'use strict'
 
-var Trustcoin = artifacts.require("./Trustcoin.sol")
+// var Trustcoin = artifacts.require("./Trustcoin.sol")
 
 let assert = require('chai').assert
 let consts = require("./consts.js")
