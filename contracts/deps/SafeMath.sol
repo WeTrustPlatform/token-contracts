@@ -2,7 +2,7 @@
  *  Taken from: https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/SafeMath.sol
  */
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 
 /**

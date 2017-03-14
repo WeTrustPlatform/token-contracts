@@ -10,7 +10,7 @@
  *  Obviously it's best to design contracts with outgoing migrations in mind however
  */
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';

@@ -7,7 +7,7 @@
  *  https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/HumanStandardToken.sol
  */
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';

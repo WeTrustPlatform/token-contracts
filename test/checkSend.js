@@ -1,6 +1,6 @@
 'use strict'
 
-let Trustcoin = artifacts.require("./Trustcoin.sol")
+// let Trustcoin = artifacts.require("./Trustcoin.sol")
 
 let Promise = require("bluebird")
 let co = require("co").wrap

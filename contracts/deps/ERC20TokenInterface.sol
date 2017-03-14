@@ -1,4 +1,4 @@
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 // Abstract contract for the full ERC 20 Token standard
 // https://github.com/ethereum/EIPs/issues/20
@@ -16,7 +16,7 @@ contract ERC20TokenInterface {
     function by the compiler.
     */
     /// total amount of tokens
-    function totalSupply() external returns (uint256 balance);
+    uint256 public totalSupply;
 
     /// @param _owner The address from which the balance will be retrieved
     /// @return The balance
