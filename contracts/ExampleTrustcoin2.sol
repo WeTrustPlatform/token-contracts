@@ -23,7 +23,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   string public constant symbol = 'TRST2';
   string public constant version = 'TRST2.0';
   uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
-  address public constant oldToken = 0; // @todo replace with real token address
+  address public oldTokenAddress = 0; // @todo replace with real token address
   bool public allowIncomingMigrations = true; // Is set to false when we finalize migration
 
   mapping (address => uint256) public balances; // (ERC20)
@@ -32,8 +32,12 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   event IncomingMigrationFinalized();
 
   modifier onlyFromOldToken() {
-    if (msg.sender != oldToken) throw;
+    if (msg.sender != oldTokenAddress) throw;
     _;
+  }
+
+  function oldTokenAddress() external returns (address) {
+    return oldTokenAddress;
   }
 
   // See ERC20

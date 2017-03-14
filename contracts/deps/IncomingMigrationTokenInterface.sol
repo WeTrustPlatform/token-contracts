@@ -1,4 +1,4 @@
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 //  Abstract contract for tokens which wish to allow migrations from
 //  older versions of themselves. This interface does not define permissioning,
