@@ -19,7 +19,7 @@ contract("Authentication", function(accounts_) {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
     let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield utils.assertDoesNotThrow(trst.changeMigrationMaster(owner, {from: migrationMaster}))
+    yield trst.changeMigrationMaster(owner, {from: migrationMaster})
     let contractMigrationMaster = yield trst.migrationMaster.call()
     assert.equal(contractMigrationMaster, owner)
   }))
@@ -35,7 +35,7 @@ contract("Authentication", function(accounts_) {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
     let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield utils.assertDoesNotThrow(trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: migrationMaster}))
+    yield trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: migrationMaster})
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
     assert.equal(allowMigrations, true)
   }))
@@ -56,8 +56,17 @@ contract("Authentication", function(accounts_) {
     let trst2 = yield utils.deployExampleTrustcoin2(owner)
     yield trst.beginMigrationPeriod(trst2.address, {from: migrationMaster})
     utils.increaseTime(consts.ONE_YEAR_IN_SECONDS)
-    yield utils.assertDoesNotThrow(trst.finalizeOutgoingMigration({from: migrationMaster}))
+    utils.mineOneBlock()
+    
+    let allowOutgoingMigrationsUntilAtLeast = yield trst.allowOutgoingMigrationsUntilAtLeast.call()
+    console.log(allowOutgoingMigrationsUntilAtLeast.toNumber())
+
+    let blockTime = yield trst.blockTime.call()
+    console.log(blockTime.toNumber())
+
+    yield trst.finalizeOutgoingMigration({from: migrationMaster, gas: 2400000})
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
+
     assert.equal(allowMigrations, false)
   }))
 })

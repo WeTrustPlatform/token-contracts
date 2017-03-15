@@ -7,8 +7,6 @@
  *  https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/HumanStandardToken.sol
  */
 
-pragma solidity ^0.4.8;
-
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';
 import './deps/OutgoingMigrationTokenInterface.sol';
@@ -34,21 +32,13 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   modifier onlyFromMigrationMaster() {
     if (msg.sender != migrationMaster) throw;
-    _;
+    _
   }
 
   function Trustcoin(address _migrationMaster) {
     if (_migrationMaster == 0) throw;
     migrationMaster = _migrationMaster;
     balances[msg.sender] = totalSupply;
-  }
-
-  function totalMigrated() external returns (uint256) { 
-    return totalMigrated;
-  }
-
-  function newTokenAddress() external returns (address) {
-    return newTokenAddress;
   }
 
   // See ERC20
@@ -101,6 +91,10 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   function changeMigrationMaster(address _master) onlyFromMigrationMaster external {
     if (_master == 0) throw;
     migrationMaster = _master;
+  }
+
+  function blockTime() external returns (uint256) {
+    return now;
   }
 
   // See OutgoingMigrationTokenInterface

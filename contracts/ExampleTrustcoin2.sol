@@ -10,8 +10,6 @@
  *  Obviously it's best to design contracts with outgoing migrations in mind however
  */
 
-pragma solidity ^0.4.8;
-
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';
 import './Trustcoin.sol';
@@ -33,11 +31,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
 
   modifier onlyFromOldToken() {
     if (msg.sender != oldTokenAddress) throw;
-    _;
-  }
-
-  function oldTokenAddress() external returns (address) {
-    return oldTokenAddress;
+    _
   }
 
   // See ERC20
@@ -99,5 +93,4 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
     allowIncomingMigrations = false;
     IncomingMigrationFinalized();
   }
-
 }

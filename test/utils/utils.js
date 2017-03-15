@@ -1,7 +1,7 @@
 'use strict'
 
-var Trustcoin = artifacts.require("./Trustcoin.sol")
-var ExampleTrustcoin2 = artifacts.require("./ExampleTrustcoin2.sol")
+// var Trustcoin = artifacts.require("./Trustcoin.sol")
+// var ExampleTrustcoin2 = artifacts.require("./ExampleTrustcoin2.sol")
 
 let assert = require('chai').assert
 let consts = require("./consts.js")
@@ -36,11 +36,11 @@ module.exports = {
   },
 
   deployTrustcoin: function(owner, migrationMaster) {
-    return Trustcoin.new(migrationMaster, {from: owner})
+    return Trustcoin.new(migrationMaster, {from: owner, gas: 2400000})
   },
 
   deployExampleTrustcoin2: function(owner) {
-    return ExampleTrustcoin2.new({from: owner})
+    return ExampleTrustcoin2.new({from: owner, gas: 2400000})
   },
 
   increaseTime: function(bySeconds) {
@@ -48,6 +48,14 @@ module.exports = {
       jsonrpc: "2.0",
       method: "evm_increaseTime",
       params: [bySeconds],
+      id: new Date().getTime(),
+    });
+  },
+
+  mineOneBlock: function() {
+    myWeb3.currentProvider.send({
+      jsonrpc: "2.0",
+      method: "evm_mine",
       id: new Date().getTime(),
     });
   },
