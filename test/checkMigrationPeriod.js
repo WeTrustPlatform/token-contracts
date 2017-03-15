@@ -11,7 +11,7 @@ contract("Migration Period", function(accounts_) {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
     let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    let trst2 = yield utils.deployExampleTrustcoin2(owner)
+    let trst2 = yield utils.deployExampleTrustcoin2(owner, trst.address)
     yield trst.beginMigrationPeriod(trst2.address, {from: migrationMaster})
     yield utils.assertThrows(trst.finalizeOutgoingMigration({from: migrationMaster}))
   }))
@@ -19,9 +19,10 @@ contract("Migration Period", function(accounts_) {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
     let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    let trst2 = yield utils.deployExampleTrustcoin2(owner)
+    let trst2 = yield utils.deployExampleTrustcoin2(owner, trst.address)
     yield trst.beginMigrationPeriod(trst2.address, {from: migrationMaster})
     utils.increaseTime(consts.ONE_YEAR_IN_SECONDS)
-    yield utils.assertDoesNotThrow(trst.finalizeOutgoingMigration({from: migrationMaster}))
+    utils.mineOneBlock()
+    yield trst.finalizeOutgoingMigration({from: migrationMaster})
   }))
 })

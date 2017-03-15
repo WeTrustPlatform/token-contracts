@@ -36,6 +36,11 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
     _;
   }
 
+  function ExampleTrustcoin2(address _oldTokenAddress) {
+    if (_oldTokenAddress == 0) throw;
+    oldTokenAddress = _oldTokenAddress;
+  }
+
   // See ERC20
   function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
