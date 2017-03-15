@@ -2,6 +2,7 @@
 //  older versions of themselves. This interface does not define permissioning,
 //  but it is highly reccommended that some methods are implemented
 //  with permissions in mind.
+pragma solidity ^0.4.7;
 
 contract IncomingMigrationTokenInterface {
 
@@ -18,7 +19,7 @@ contract IncomingMigrationTokenInterface {
 
   /// Ends the possibility for any more tokens to be migrated from the old
   /// contract to the new one. It's not strictly necessary to have our own
-  /// flag for whether migrations are permitted or not, but it helps the token 
+  /// flag for whether migrations are permitted or not, but it helps the token
   /// contract be self-contained. Also means anyone listening to contract events
   /// only has to listen to the new contract to know when finalization happens.
   /// Implementations of this should feel free to ignore this functionality at

@@ -2,6 +2,7 @@
 //  to a future version. This interface does not define permissioning,
 //  but it is highly reccommended that some methods are implemented
 //  with permissions in mind.
+pragma solidity ^0.4.7;
 
 contract OutgoingMigrationTokenInterface {
 
@@ -16,7 +17,7 @@ contract OutgoingMigrationTokenInterface {
   /// Begins the migration period to the new version of the token
   /// @param _newTokenAddress Address of the new token contract
   function beginMigrationPeriod(address _newTokenAddress) external;
-  
+
   /// Burns the tokens from an address and increments the totalMigrated
   /// by the same value. Also should invoke the method on the new token
   /// which mints and attributes the tokens.
