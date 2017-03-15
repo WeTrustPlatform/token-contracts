@@ -1,9 +1,7 @@
 /**
  *  Taken from: https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/SafeMath.sol
  */
-
-pragma solidity ^0.4.8;
-
+pragma solidity ^0.4.7;
 
 /**
  * Math operations with safety checks
