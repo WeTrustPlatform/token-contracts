@@ -18,62 +18,50 @@ contract("Authentication", function(accounts_) {
   }))
   
   it("should not allow migration master to be changed by anyone other than migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield utils.assertThrows(trst.changeMigrationMaster(owner, {from: owner}))
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    yield utils.assertThrows(trst.changeMigrationMaster(OWNER, {from: OWNER}))
     let contractMigrationMaster = yield trst.migrationMaster.call()
-    assert.equal(contractMigrationMaster, migrationMaster)
+    assert.equal(contractMigrationMaster, MIGRATION_MASTER)
   }))
 
   it("should allow migration master to be changed by migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield trst.changeMigrationMaster(owner, {from: migrationMaster})
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    yield trst.changeMigrationMaster(OWNER, {from: MIGRATION_MASTER})
     let contractMigrationMaster = yield trst.migrationMaster.call()
-    assert.equal(contractMigrationMaster, owner)
+    assert.equal(contractMigrationMaster, OWNER)
   }))
 
   it("should not allow migration period to be started by anyone other than migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield utils.assertThrows(trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: owner}));
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    yield utils.assertThrows(trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: OWNER}));
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
     assert.isNotOk(allowMigrations)
   }))
 
   it("should allow migration period to be started by migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: migrationMaster})
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    yield trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: MIGRATION_MASTER})
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
     assert.isOk(allowMigrations)
   }))
 
   it("should not allow migration finalization by anyone other than migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    yield trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: migrationMaster})
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    yield trst.beginMigrationPeriod(consts.NON_ZERO_ADDRESS, {from: MIGRATION_MASTER})
     utils.increaseTime(consts.ONE_YEAR_IN_SECONDS)
     utils.mineOneBlock()
-    yield utils.assertThrows(trst.finalizeOutgoingMigration({from: owner}))
+    yield utils.assertThrows(trst.finalizeOutgoingMigration({from: OWNER}))
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
     assert.isOk(allowMigrations)
   }))
 
   it("should allow migration finalization by migration master", co(function* () {
-    let owner = accounts_[0]
-    let migrationMaster = accounts_[1]
-    let trst = yield utils.deployTrustcoin(owner, migrationMaster)
-    let trst2 = yield utils.deployExampleTrustcoin2(owner, trst.address)
-    yield trst.beginMigrationPeriod(trst2.address, {from: migrationMaster})
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
+    yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
     utils.increaseTime(MINIMUM_MIGRATION_DURATION.toNumber() + consts.ONE_WEEK_IN_SECONDS)
     utils.mineOneBlock()
-    yield trst.finalizeOutgoingMigration({from: migrationMaster, gas: 2400000})
+    yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER, gas: 2400000})
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
     assert.isNotOk(allowMigrations)
   }))
