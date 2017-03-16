@@ -85,5 +85,16 @@ contract("Migration Features", function(accounts_) {
     assert.equal(tokenHolderOldTokenBalance, tokensToMigrate)
     assert.equal(tokenHolderNewTokenBalance, 0)
   }))
+
+  it("should not allow restarting migration after finalization", co(function* () {
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
+    let trst3 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
+    yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
+    utils.increaseTime(MINIMUM_MIGRATION_DURATION.toNumber() + consts.ONE_WEEK_IN_SECONDS)
+    utils.mineOneBlock()
+    yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER})
+    yield utils.assertThrows(trst.beginMigrationPeriod(trst3.address, {from: MIGRATION_MASTER}))
+  }))
   
 })
