@@ -17,7 +17,7 @@ import './deps/IncomingMigrationTokenInterface.sol';
 contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
 
   string public constant name = 'Trustcoin';
-  uint8 public constant decimals = 6;
+  uint256 public constant decimals = 6;
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
@@ -27,6 +27,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint256 public allowOutgoingMigrationsUntilAtLeast;
   bool public allowOutgoingMigrations = false;
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
+  address public newTokenAddress;
 
   mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)

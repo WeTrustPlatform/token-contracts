@@ -25,6 +25,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
   address public constant oldToken = 0; // @todo replace with real token address
   bool public allowIncomingMigrations = true; // Is set to false when we finalize migration
+  address public oldTokenAddress;
 
   mapping (address => uint256) public balances; // (ERC20)
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)

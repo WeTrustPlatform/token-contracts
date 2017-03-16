@@ -1,4 +1,4 @@
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 //  Abstract contract for tokens which wish to allow migrations from
 //  older versions of themselves. This interface does not define permissioning,
@@ -9,7 +9,8 @@ contract IncomingMigrationTokenInterface {
 
   /// Getter function for the old token address
   /// @return address Address of the old token
-  function oldTokenAddress() external returns (address);
+  // function oldTokenAddress() external returns (address);
+  address public oldTokenAddress;
 
   /// Increases the totalSupply of the contract by _value, as well as
   /// attributing that _value to the user with address _from. This call

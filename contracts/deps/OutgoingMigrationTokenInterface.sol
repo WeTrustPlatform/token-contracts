@@ -1,4 +1,4 @@
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 //  Abstract contract for tokens which wish to allow optional migrations
 //  to a future version. This interface does not define permissioning,
@@ -9,11 +9,13 @@ contract OutgoingMigrationTokenInterface {
 
   /// Getter function for the current total of migrated tokens
   /// @return uint256 Current number of tokens migrated to the new contract
-  function totalMigrated() external returns (uint256);
+  uint256 public totalMigrated;
+  // function totalMigrated() constant external returns (uint256);
 
   /// Getter function for the new token address
   /// @return address Address of the new token
-  function newTokenAddress() external returns (address);
+  address public newTokenAddress;
+  // function newTokenAddress() constant external returns (address);
 
   /// Begins the migration period to the new version of the token
   /// @param _newTokenAddress Address of the new token contract
