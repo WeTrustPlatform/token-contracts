@@ -7,7 +7,7 @@
  *  https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/HumanStandardToken.sol
  */
 
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.7;
 
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';
@@ -17,7 +17,7 @@ import './deps/IncomingMigrationTokenInterface.sol';
 contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
 
   string public constant name = 'Trustcoin';
-  uint8 public constant decimals = 6;
+  uint256 public constant decimals = 6;
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
@@ -49,7 +49,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
       balances[_to] += _value;
       Transfer(msg.sender, _to, _value);
       return true;
-    } 
+    }
     return false;
   }
 
@@ -101,12 +101,14 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     newToken.finalizeIncomingMigration();
     allowOutgoingMigrations = false;
   }
-  
+
   // See OutgoingMigrationTokenInterface
   function beginMigrationPeriod(address _newTokenAddress) onlyFromMigrationMaster external {
     if (allowOutgoingMigrations) throw; // Ensure we haven't already started allowing migrations
     if (_newTokenAddress == 0) throw;
-    newToken = IncomingMigrationTokenInterface(_newTokenAddress);
+    if (newTokenAddress != 0) throw;
+    newTokenAddress = _newTokenAddress;
+    newToken = IncomingMigrationTokenInterface(newTokenAddress);
     allowOutgoingMigrationsUntilAtLeast = (now + minimumMigrationDuration);
     allowOutgoingMigrations = true;
   }

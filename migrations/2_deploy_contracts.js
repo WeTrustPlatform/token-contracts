@@ -1,7 +1,7 @@
-var Trustcoin = artifacts.require("./Trustcoin.sol");
-var ExampleTrustcoin2 = artifacts.require("./ExampleTrustcoin2.sol");
-
 module.exports = function(deployer) {
-  deployer.deploy(Trustcoin);
-  deployer.deploy(ExampleTrustcoin2);
+  deployer.then(function() {
+    return Trustcoin.new(web3.eth.accounts[0], {gas: 2400000});
+  }).then(function(trst) {
+    return ExampleTrustcoin2.new(trst.address, {gas: 2400000});
+  })
 };
