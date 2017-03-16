@@ -6,8 +6,7 @@ pragma solidity ^0.4.7;
 
 contract IncomingMigrationTokenInterface {
 
-  /// Getter function for the old token address
-  /// @return address Address of the old token
+  /// Old token address, publicly verifiable.
   address public oldTokenAddress;
 
   /// Increases the totalSupply of the contract by _value, as well as

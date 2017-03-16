@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Creates the ROSCATest.sol contract (with members publicized)
-# and runs the tests.
+# Runs tests against Trustcoin.sol and ExampleTrustcoin2.sol
 # Any commandline parameters are passed to "truffle test".
 
 runCommand() {

@@ -1,13 +1,9 @@
 'use strict'
 
-// var Trustcoin = artifacts.require("./Trustcoin.sol")
-// var ExampleTrustcoin2 = artifacts.require("./ExampleTrustcoin2.sol")
-
 let assert = require('chai').assert
 let consts = require("./consts.js")
 let Promise = require("bluebird")
 
-// we need this becaues test env is different than script env
 let myWeb3 = (typeof web3 === undefined ? undefined : web3)
 
 module.exports = {
@@ -26,15 +22,7 @@ module.exports = {
       assert.include(e.message, 'invalid JUMP', "Invalid Jump error didn't occur")
     })
   },
-
-  assertDoesNotThrow: function(promise, err) {
-    return promise.then(function() {
-      assert.isNotOk(true, err)
-    }).catch(function(e) {
-      assert.notInclude(e.message, 'invalid JUMP', "Invalid Jump error occurred")
-    })
-  },
-
+  
   deployTrustcoin: function(owner, migrationMaster) {
     return Trustcoin.new(migrationMaster, {from: owner, gas: 2400000})
   },

@@ -7,6 +7,7 @@ let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
 contract("Migration Features", function(accounts_) {
+
   it("should not allow migrating tokens before migration has started", co(function* () {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
@@ -17,6 +18,7 @@ contract("Migration Features", function(accounts_) {
     let newTokenSupply = yield trst2.totalSupply.call()
     assert.equal(newTokenSupply, 0)
   }))
+
   it("should not allow migrating 0 tokens", co(function* () {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
@@ -27,6 +29,7 @@ contract("Migration Features", function(accounts_) {
     let newTokenSupply = yield trst2.totalSupply.call()
     assert.equal(newTokenSupply, 0)
   }))
+
   it("should not allow migrating more tokens than we own", co(function* () {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
@@ -38,6 +41,7 @@ contract("Migration Features", function(accounts_) {
     let newTokenSupply = yield trst2.totalSupply.call()
     assert.equal(newTokenSupply, 0)
   }))
+
   it("should allow migrating tokens that we own", co(function* () {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
@@ -49,6 +53,7 @@ contract("Migration Features", function(accounts_) {
     let newTokenSupply = yield trst2.totalSupply.call()
     assert.equal(newTokenSupply, tokensToMigrate)
   }))
+
   it("should not allow migrating after finalization", co(function* () {
     let owner = accounts_[0]
     let migrationMaster = accounts_[1]
@@ -63,4 +68,5 @@ contract("Migration Features", function(accounts_) {
     let newTokenSupply = yield trst2.totalSupply.call()
     assert.equal(newTokenSupply, 0)
   }))
+  
 })

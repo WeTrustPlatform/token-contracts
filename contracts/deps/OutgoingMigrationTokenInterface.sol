@@ -6,15 +6,13 @@ pragma solidity ^0.4.7;
 
 contract OutgoingMigrationTokenInterface {
 
-  /// Getter function for the current total of migrated tokens
-  /// @return uint256 Current number of tokens migrated to the new contract
+  /// Current total of migrated tokens.
   uint256 public totalMigrated;
 
-  /// Getter function for the new token address
-  /// @return address Address of the new token
+  /// The new token address, publicly verifiable.
   address public newTokenAddress;
 
-  /// Begins the migration period to the new version of the token
+  /// Begins the migration period to the new version of the token.
   /// @param _newTokenAddress Address of the new token contract
   function beginMigrationPeriod(address _newTokenAddress) external;
 
