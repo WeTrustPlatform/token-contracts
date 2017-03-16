@@ -7,6 +7,15 @@ let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
 contract("Authentication", function(accounts_) {
+
+  let MINIMUM_MIGRATION_DURATION
+  let OWNER = accounts_[0]
+  let MIGRATION_MASTER = accounts_[1]
+
+  before(co(function* () {
+    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
+    MINIMUM_MIGRATION_DURATION = yield trst.minimumMigrationDuration.call()
+  }))
   
   it("should not allow migration master to be changed by anyone other than migration master", co(function* () {
     let owner = accounts_[0]
@@ -62,7 +71,7 @@ contract("Authentication", function(accounts_) {
     let trst = yield utils.deployTrustcoin(owner, migrationMaster)
     let trst2 = yield utils.deployExampleTrustcoin2(owner, trst.address)
     yield trst.beginMigrationPeriod(trst2.address, {from: migrationMaster})
-    utils.increaseTime(consts.ONE_YEAR_IN_SECONDS)
+    utils.increaseTime(MINIMUM_MIGRATION_DURATION.toNumber() + consts.ONE_WEEK_IN_SECONDS)
     utils.mineOneBlock()
     yield trst.finalizeOutgoingMigration({from: migrationMaster, gas: 2400000})
     let allowMigrations = yield trst.allowOutgoingMigrations.call()
