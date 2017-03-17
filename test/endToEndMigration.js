@@ -10,11 +10,13 @@ contract("Migration Features", function(accounts_) {
 
   let MINIMUM_MIGRATION_DURATION
   let TOTAL_SUPPLY
-  let OWNER = accounts_[0]
-  let MIGRATION_MASTER = accounts_[1]
-  let ACCOUNT_ONE = accounts_[2]
-  let ACCOUNT_TWO = accounts_[3]
-  let ACCOUNT_THREE = accounts_[4]
+  const OWNER = accounts_[0]
+  const MIGRATION_MASTER = accounts_[1]
+  const ACCOUNT_ONE = accounts_[2]
+  const ACCOUNT_TWO = accounts_[3]
+  const ACCOUNT_THREE = accounts_[4]
+  const TOKENS_TO_HOLD = 1000
+  const TOKENS_TO_MIGRATE = 500
 
   before(co(function* () {
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
@@ -23,35 +25,33 @@ contract("Migration Features", function(accounts_) {
   }))
 
   it("should test migration features fully", co(function* () {
-    let tokensToHold = 1000
-    let tokensToMigrate = tokensToHold / 2
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
-    yield trst.transfer(ACCOUNT_ONE, tokensToHold, {from: OWNER})
-    yield trst.transfer(ACCOUNT_TWO, tokensToHold, {from: OWNER})
-    yield trst.transfer(ACCOUNT_THREE, tokensToHold, {from: OWNER})
+    yield trst.transfer(ACCOUNT_ONE, TOKENS_TO_HOLD, {from: OWNER})
+    yield trst.transfer(ACCOUNT_TWO, TOKENS_TO_HOLD, {from: OWNER})
+    yield trst.transfer(ACCOUNT_THREE, TOKENS_TO_HOLD, {from: OWNER})
     yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
 
     // Assert total supply migrations
-    yield trst.migrateToNewContract(tokensToMigrate, {from: ACCOUNT_ONE})
+    yield trst.migrateToNewContract(TOKENS_TO_MIGRATE, {from: ACCOUNT_ONE})
     let totalSupplyOldContract = yield trst.totalSupply.call()
     let totalSupplyNewContract = yield trst2.totalSupply.call()
-    assert.equal(totalSupplyOldContract.toNumber(), TOTAL_SUPPLY.toNumber() - tokensToMigrate)
-    assert.equal(totalSupplyNewContract.toNumber(), tokensToMigrate)
+    assert.equal(totalSupplyOldContract.toNumber(), TOTAL_SUPPLY.toNumber() - TOKENS_TO_MIGRATE)
+    assert.equal(totalSupplyNewContract.toNumber(), TOKENS_TO_MIGRATE)
     assert.equal(totalSupplyOldContract.toNumber() + totalSupplyNewContract.toNumber(), TOTAL_SUPPLY.toNumber())
 
     // Assert balance migrations
     let accountOneBalanceOldContract = yield trst.balanceOf(ACCOUNT_ONE)
     let accountOneBalanceNewContract = yield trst2.balanceOf(ACCOUNT_ONE)
-    assert.equal(accountOneBalanceOldContract.toNumber(), tokensToHold - tokensToMigrate)
-    assert.equal(accountOneBalanceNewContract.toNumber(), tokensToMigrate)
-    assert.equal(accountOneBalanceOldContract.toNumber() + accountOneBalanceNewContract.toNumber(), tokensToHold)
+    assert.equal(accountOneBalanceOldContract.toNumber(), TOKENS_TO_HOLD - TOKENS_TO_MIGRATE)
+    assert.equal(accountOneBalanceNewContract.toNumber(), TOKENS_TO_MIGRATE)
+    assert.equal(accountOneBalanceOldContract.toNumber() + accountOneBalanceNewContract.toNumber(), TOKENS_TO_HOLD)
 
     // Assert migration finalization
     utils.increaseTime(MINIMUM_MIGRATION_DURATION.toNumber() + consts.ONE_WEEK_IN_SECONDS)
     utils.mineOneBlock()
     yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER})
-    yield utils.assertThrows(trst.migrateToNewContract(tokensToMigrate, {from: ACCOUNT_TWO}))
+    yield utils.assertThrows(trst.migrateToNewContract(TOKENS_TO_MIGRATE, {from: ACCOUNT_TWO}))
 
     // Assert old contract transfers
     let accountTwoBalanceOldContract = yield trst.balanceOf(ACCOUNT_TWO)
@@ -73,5 +73,4 @@ contract("Migration Features", function(accounts_) {
     accountTwoBalanceNewContract = yield trst2.balanceOf(ACCOUNT_TWO) // Get it again, post-transfer
     assert.equal(accountTwoBalanceNewContract.toNumber(), accountTwoBalanceNewContractShouldBe)
   }))
-  
 })

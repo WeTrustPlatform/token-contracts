@@ -16,7 +16,7 @@ contract("Sending and receiving", function(accounts_) {
     TOTAL_SUPPLY = yield trst.totalSupply.call()
   }))
 
-  it("should send coin correctly", co(function* () {
+  it("should transfer coin correctly", co(function* () {
     let amount = 10
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let accountOneStartingBalance = yield trst.balanceOf.call(OWNER)
@@ -24,13 +24,13 @@ contract("Sending and receiving", function(accounts_) {
     yield trst.transfer(MIGRATION_MASTER, amount, {from: OWNER})
     let accountOneEndingBalance = yield trst.balanceOf.call(OWNER)
     let accountTwoEndingBalance = yield trst.balanceOf.call(MIGRATION_MASTER)
-    assert.equal(accountOneEndingBalance.toNumber(), accountOneStartingBalance.toNumber() - amount, "Amount wasn't correctly taken from the sender")
-    assert.equal(accountTwoEndingBalance.toNumber(), accountTwoStartingBalance.toNumber() + amount, "Amount wasn't correctly sent to the receiver")
+    assert.equal(accountOneEndingBalance.toNumber(), accountOneStartingBalance.toNumber() - amount)
+    assert.equal(accountTwoEndingBalance.toNumber(), accountTwoStartingBalance.toNumber() + amount)
     let newTotalSupply = yield trst.totalSupply.call()
     assert.equal(newTotalSupply.toNumber(), TOTAL_SUPPLY.toNumber())
   }))
 
-  it("should not allow sending more than an account's balance", co(function* () {
+  it("should not allow transferring more than an account's balance", co(function* () {
     let amount = 100
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let accountOneStartingBalance = yield trst.balanceOf.call(OWNER)
@@ -38,10 +38,9 @@ contract("Sending and receiving", function(accounts_) {
     yield trst.transfer(OWNER, accountTwoStartingBalance + amount, {from: MIGRATION_MASTER})
     let accountOneEndingBalance = yield trst.balanceOf.call(OWNER)
     let accountTwoEndingBalance = yield trst.balanceOf.call(MIGRATION_MASTER)
-    assert.equal(accountOneEndingBalance.toNumber(), accountOneStartingBalance.toNumber(), "Amount was given to the receiver")
-    assert.equal(accountTwoEndingBalance.toNumber(), accountTwoStartingBalance.toNumber(), "Amount was taken from the sender")
+    assert.equal(accountOneEndingBalance.toNumber(), accountOneStartingBalance.toNumber())
+    assert.equal(accountTwoEndingBalance.toNumber(), accountTwoStartingBalance.toNumber())
     let newTotalSupply = yield trst.totalSupply.call()
     assert.equal(newTotalSupply.toNumber(), TOTAL_SUPPLY.toNumber())
   }))
-
 })
