@@ -9,6 +9,7 @@
     "quotes": [0, "single", {allowTemplateLiterals: true}],
     // at this point of time, we do not require jsdoc
     "require-jsdoc": 0,
+    "semi": "never",
   },
   "parserOptions": {
     "ecmaVersion": 6,
@@ -20,12 +21,14 @@
       "contract": false,
       "ERC20TokenInterface": false,
       "ExampleToken": false,
+      "ExampleTrustcoin2": false,
       "it": false,
       "module": false,
       "require": false,
       "ROSCA": false,
       "ROSCATest": false,
       "TestReEntryAttack": false,
+      "Trustcoin": false,
       "web3": false
   },
 }
