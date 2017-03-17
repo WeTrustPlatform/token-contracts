@@ -1,13 +1,11 @@
 'use strict'
 
-let Promise = require("bluebird")
 let co = require("co").wrap
 let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
 contract("Migration Features", function(accounts_) {
-
   let MINIMUM_MIGRATION_DURATION
   let OWNER = accounts_[0]
   let MIGRATION_MASTER = accounts_[1]
@@ -38,27 +36,15 @@ contract("Migration Features", function(accounts_) {
     assert.equal(newTokenSupply, 0)
   }))
 
-  it("should not allow migrating more tokens than we own", co(function* () {
+  it("should allow migrating only tokens that we own", co(function* () {
     let tokensToMigrate = 10
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
     yield trst.transfer(TOKEN_HOLDER, tokensToMigrate, {from: OWNER})
     yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
-    yield utils.assertThrows(trst.migrateToNewContract(tokensToMigrate + 1, {from: TOKEN_HOLDER}))
-    let newTokenSupply = yield trst2.totalSupply.call()
-    let tokenHolderOldTokenBalance = yield trst.balanceOf(TOKEN_HOLDER)
-    let tokenHolderNewTokenBalance = yield trst2.balanceOf(TOKEN_HOLDER)
-    assert.equal(newTokenSupply, 0)
-    assert.equal(tokenHolderOldTokenBalance, tokensToMigrate)
-    assert.equal(tokenHolderNewTokenBalance, 0)
-  }))
 
-  it("should allow migrating tokens that we own", co(function* () {
-    let tokensToMigrate = 10
-    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
-    let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
-    yield trst.transfer(TOKEN_HOLDER, tokensToMigrate, {from: OWNER})
-    yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
+    yield utils.assertThrows(trst.migrateToNewContract(tokensToMigrate + 1, {from: TOKEN_HOLDER}))
+
     yield trst.migrateToNewContract(tokensToMigrate, {from: TOKEN_HOLDER})
     let newTokenSupply = yield trst2.totalSupply.call()
     let tokenHolderOldTokenBalance = yield trst.balanceOf(TOKEN_HOLDER)
@@ -96,5 +82,4 @@ contract("Migration Features", function(accounts_) {
     yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER})
     yield utils.assertThrows(trst.beginMigrationPeriod(trst3.address, {from: MIGRATION_MASTER}))
   }))
-  
 })

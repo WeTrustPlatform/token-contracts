@@ -22,7 +22,7 @@ module.exports = {
       assert.include(e.message, 'invalid JUMP', "Invalid Jump error didn't occur")
     })
   },
-  
+
   deployTrustcoin: function(owner, migrationMaster) {
     return Trustcoin.new(migrationMaster, {from: owner, gas: 2400000})
   },
@@ -59,5 +59,5 @@ module.exports = {
         reject(reason);
       })
     })
-  }
+  },
 };
