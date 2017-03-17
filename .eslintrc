@@ -9,7 +9,7 @@
     "quotes": [0, "single", {allowTemplateLiterals: true}],
     // at this point of time, we do not require jsdoc
     "require-jsdoc": 0,
-    "semi": "never",
+    "semi": 0,
   },
   "parserOptions": {
     "ecmaVersion": 6,
