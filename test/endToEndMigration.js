@@ -1,13 +1,11 @@
 'use strict'
 
-let Promise = require("bluebird")
 let co = require("co").wrap
 let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
 contract("Migration Features", function(accounts_) {
-
   let MINIMUM_MIGRATION_DURATION
   let TOTAL_SUPPLY
   const OWNER = accounts_[0]

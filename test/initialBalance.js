@@ -1,13 +1,10 @@
 'use strict'
 
-let Promise = require("bluebird")
 let co = require("co").wrap
 let assert = require('chai').assert
 let utils = require("./utils/utils.js")
-let consts = require("./utils/consts.js")
 
 contract("Status immediately post-deployment", function(accounts_) {
-
   let TOTAL_SUPPLY
   let OWNER = accounts_[0]
   let MIGRATION_MASTER = accounts_[1]
@@ -18,7 +15,8 @@ contract("Status immediately post-deployment", function(accounts_) {
   }))
 
   // accounts_ is all the accounts that we have in testrpc
-  it("should put " + TOTAL_SUPPLY + " (one hundred million plus 6 decimals) Trustcoin in msg.sender's account", co(function* () {
+  it("should put " + TOTAL_SUPPLY + " (one hundred million plus 6 decimals) Trustcoin in " +
+      "msg.sender's account", co(function* () {
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let balance = yield trst.balanceOf.call(OWNER)
     return assert.equal(balance.valueOf(), TOTAL_SUPPLY)
@@ -29,5 +27,4 @@ contract("Status immediately post-deployment", function(accounts_) {
     let contractMigrationMaster = yield trst.migrationMaster.call()
     assert.equal(contractMigrationMaster, MIGRATION_MASTER)
   }))
-
 })

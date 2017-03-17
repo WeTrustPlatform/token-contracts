@@ -1,13 +1,11 @@
 'use strict'
 
-let Promise = require("bluebird")
 let co = require("co").wrap
 let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
 contract("Migration Features", function(accounts_) {
-
   let MINIMUM_MIGRATION_DURATION
   let OWNER = accounts_[0]
   let MIGRATION_MASTER = accounts_[1]
@@ -84,5 +82,4 @@ contract("Migration Features", function(accounts_) {
     yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER})
     yield utils.assertThrows(trst.beginMigrationPeriod(trst3.address, {from: MIGRATION_MASTER}))
   }))
-
 })
