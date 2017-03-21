@@ -15,7 +15,7 @@ contract("Migration Period", function(accounts_) {
     MINIMUM_MIGRATION_DURATION = yield trst.minimumMigrationDuration.call()
   }))
 
-  it("should not allow migration finalization until after mimumum migration period", co(function* () {
+  it("should not allow migration finalization until after minimum migration period", co(function* () {
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
     let trst2 = yield utils.deployExampleTrustcoin2(OWNER, trst.address)
     yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
