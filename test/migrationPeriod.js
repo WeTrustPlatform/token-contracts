@@ -22,7 +22,6 @@ contract("Migration Period", function(accounts_) {
     utils.increaseTime(MINIMUM_MIGRATION_DURATION.toNumber() - consts.ONE_WEEK_IN_SECONDS)
     utils.mineOneBlock()
     yield utils.assertThrows(trst.finalizeOutgoingMigration({from: MIGRATION_MASTER}))
-
     utils.increaseTime(consts.ONE_WEEK_IN_SECONDS * 2)
     utils.mineOneBlock()
     yield trst.finalizeOutgoingMigration({from: MIGRATION_MASTER})
