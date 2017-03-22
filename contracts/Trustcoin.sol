@@ -29,7 +29,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
   mapping (address => uint256) public balances; // (ERC20)
-  mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
+  mapping (address => mapping (address => int256)) public allowed; // (ERC20)
 
   modifier onlyFromMigrationMaster() {
     if (msg.sender != migrationMaster) throw;
@@ -55,10 +55,10 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
-    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+    if (balances[_from] >= _value && uint(allowed[_from][msg.sender]) >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
-      allowed[_from][msg.sender] -= _value;
+      allowed[_from][msg.sender] -= int(_value);
       Transfer(_from, _to, _value);
       return true;
     }
@@ -72,21 +72,27 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function approve(address _spender, uint256 _value) external returns (bool) {
-    // To change the approve amount you first have to reduce the addresses´
-    // allowance to zero by calling `approve(_spender, 0)` if it is not
-    // already 0 to mitigate the race condition described here:
     // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-    // Solution from:
-    // https://github.com/Giveth/minime/blob/master/contracts/MiniMeToken.sol#L257
-    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
+    int256 valueToSet = 0;
+    if (
+      allowed[msg.sender][_spender] < 0 &&
+      ((_value != 0) && (allowed[msg.sender][_spender] + int(block.number)) < 0)
+    ) {
+      return false;
+    }
+    if (_value == 0) {
+      valueToSet = 0 - int(block.number);
+    } else {
+      valueToSet = int(_value);
+    }
+    allowed[msg.sender][_spender] = valueToSet;
+    Approval(msg.sender, _spender, uint(valueToSet));
     return true;
   }
 
   // See ERC20
   function allowance(address _owner, address _spender) constant external returns (uint256) {
-    return allowed[_owner][_spender];
+    return uint(allowed[_owner][_spender]);
   }
 
 
