@@ -29,6 +29,11 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
   mapping (address => uint256) public balances; // (ERC20)
+
+  // This is an int256 so that we can implement a fix for this weakness in ERC20:
+  // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+  // See the comment on the appove function for our solution outline
+  // @todo explain why this would never overflow
   mapping (address => mapping (address => int256)) public allowed; // (ERC20)
 
   modifier onlyFromMigrationMaster() {
@@ -78,11 +83,13 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // See ERC20
   function approve(address _spender, uint256 _value) external returns (bool) {
     // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+    // @todo explain this
     int256 valueToSet = 0;
     if (
       allowed[msg.sender][_spender] < 0 &&
       ((_value != 0) && (allowed[msg.sender][_spender] + int256(block.number)) < 0)
     ) {
+      // @todo also explain this
       return false;
     }
     if (_value == 0) {
