@@ -55,7 +55,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
-    if (balances[_from] >= _value && uint(allowed[_from][msg.sender]) >= _value && _value > 0) {
+    if (
+      balances[_from] >= _value &&
+      allowed[_from][msg.sender] > 0 && 
+      uint256(allowed[_from][msg.sender]) >= _value &&
+      _value > 0
+    ) {
       balances[_to] += _value;
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= int256(_value);
