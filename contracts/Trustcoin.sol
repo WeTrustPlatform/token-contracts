@@ -58,7 +58,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     if (balances[_from] >= _value && uint(allowed[_from][msg.sender]) >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
-      allowed[_from][msg.sender] -= int(_value);
+      allowed[_from][msg.sender] -= int256(_value);
       Transfer(_from, _to, _value);
       return true;
     }
@@ -76,23 +76,24 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     int256 valueToSet = 0;
     if (
       allowed[msg.sender][_spender] < 0 &&
-      ((_value != 0) && (allowed[msg.sender][_spender] + int(block.number)) < 0)
+      ((_value != 0) && (allowed[msg.sender][_spender] + int256(block.number)) < 0)
     ) {
       return false;
     }
     if (_value == 0) {
-      valueToSet = 0 - int(block.number);
+      valueToSet = 0 - int256(block.number);
     } else {
-      valueToSet = int(_value);
+      valueToSet = int256(_value);
     }
     allowed[msg.sender][_spender] = valueToSet;
-    Approval(msg.sender, _spender, uint(valueToSet));
+    Approval(msg.sender, _spender, uint256(valueToSet));
     return true;
   }
 
   // See ERC20
   function allowance(address _owner, address _spender) constant external returns (uint256) {
-    return uint(allowed[_owner][_spender]);
+    if (allowed[_owner][_spender] < 0) return 0;
+    return uint256(allowed[_owner][_spender]);
   }
 
 
