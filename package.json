@@ -26,5 +26,8 @@
   "homepage": "https://github.com/WeTrustPlatform/token-contracts#readme",
   "dependencies": {
     "eslint": "^3.18.0"
+  },
+  "devDependencies": {
+    "truffle": "^2.1.2"
   }
 }
