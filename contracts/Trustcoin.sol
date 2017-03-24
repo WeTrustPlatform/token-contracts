@@ -7,7 +7,7 @@
  *  https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/HumanStandardToken.sol
  */
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';
@@ -82,9 +82,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // NOTE: this message is vulnerable and is placed here only to follow the ERC20 standard.
   // Before using, please take a look at the better compareAndSave below.
   function approve(address _spender, uint256 _value) external returns (bool) {
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
+    return doApprove(_spender, _value);
   }
 
   // A vulernability of the approve method in the ERC20 standard was identified by
@@ -99,9 +97,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     if (allowed[msg.sender][_spender] != _currentValue) {
       return false;
     }
-    allowed[msg.sender][_spender] = _newValue;
-    Approval(msg.sender, _spender, _newValue);
-    return true;
+    doApprove(_spender, _newValue);
   }
 
   // See ERC20
@@ -148,6 +144,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     totalMigrated = safeAdd(totalMigrated, _value);
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
+  }
+
+  function doApprove(address _spender, uint256 _value) internal returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
   }
 
 }

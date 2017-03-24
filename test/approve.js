@@ -5,60 +5,56 @@ let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 
 contract("Approving and transferring", function(accounts_) {
-  let TOTAL_SUPPLY
-  let OWNER = accounts_[0]
-  let ACCOUNT_ONE = accounts_[1]
-  let ACCOUNT_TWO = accounts_[2]
-  let ACCOUNT_THREE = accounts_[3]
+  let DEPLOYER_ACCOUNT = accounts_[0]
+  let OWNER_ACCOUNT = accounts_[1]
+  let SPENDER_ACCOUNT = accounts_[2]
+  let RECEIVING_ACCOUNT = accounts_[3]
   let MIGRATION_MASTER = accounts_[9]
 
-  before(co(function* () {
-    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
-    TOTAL_SUPPLY = yield trst.totalSupply.call()
-  }))
+  const INITIAL_AMOUNT = 10
+  const APPROVED_AMOUNT = 4
 
   it("should allow other users to be approved to move tokens", co(function* () {
-    let initialAmount = 10
-    let approvedAmount = 5
-    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
-    yield trst.transfer(ACCOUNT_ONE, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_TWO, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_THREE, initialAmount, {from: OWNER})
-    let accountOneStartingBalance = yield trst.balanceOf.call(ACCOUNT_ONE)
-    let accountTwoStartingBalance = yield trst.balanceOf.call(ACCOUNT_TWO)
-    let accountThreeStartingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
+    let trst = yield utils.deployTrustcoin(DEPLOYER_ACCOUNT, MIGRATION_MASTER)
+    yield trst.transfer(OWNER_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    yield trst.transfer(SPENDER_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    yield trst.transfer(RECEIVING_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    let ownerAccountStartBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    let receivingAccountStartBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
 
-    yield trst.approve(ACCOUNT_TWO, approvedAmount, {from: ACCOUNT_ONE})
-    let approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount)
+    yield trst.approve(SPENDER_ACCOUNT, APPROVED_AMOUNT, {from: OWNER_ACCOUNT})
+    let actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
+    assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
 
-    yield trst.transferFrom(ACCOUNT_ONE, ACCOUNT_THREE, approvedAmount, {from: ACCOUNT_TWO})
-    let accountThreeEndingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
-    assert.equal(accountThreeEndingBalance.toNumber(), (accountThreeStartingBalance.toNumber() + approvedAmount))
-    approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), 0)
+    yield trst.transferFrom(OWNER_ACCOUNT, RECEIVING_ACCOUNT, APPROVED_AMOUNT, {from: SPENDER_ACCOUNT})
+    let actualAccount1EndBalance = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    assert.equal(actualAccount1EndBalance.toNumber(), (ownerAccountStartBal.toNumber() - APPROVED_AMOUNT))
+    let receivingAccountEndBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
+    assert.equal(receivingAccountEndBal.toNumber(), (receivingAccountStartBal.toNumber() + APPROVED_AMOUNT))
+    actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
+    assert.equal(actualApprovalForSpendingAccount.toNumber(), 0)
   }))
 
   it("should not allow transferring more than an account's approved balance", co(function* () {
-    let initialAmount = 10
-    let approvedAmount = 5
-    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
-    yield trst.transfer(ACCOUNT_ONE, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_TWO, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_THREE, initialAmount, {from: OWNER})
-    let accountOneStartingBalance = yield trst.balanceOf.call(ACCOUNT_ONE)
-    let accountTwoStartingBalance = yield trst.balanceOf.call(ACCOUNT_TWO)
-    let accountThreeStartingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
+    let trst = yield utils.deployTrustcoin(DEPLOYER_ACCOUNT, MIGRATION_MASTER)
+    yield trst.transfer(OWNER_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    yield trst.transfer(SPENDER_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    yield trst.transfer(RECEIVING_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    let ownerAccountStartBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    let receivingAccountStartBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
 
-    yield trst.approve(ACCOUNT_TWO, approvedAmount, {from: ACCOUNT_ONE})
-    let approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount)
+    yield trst.approve(SPENDER_ACCOUNT, APPROVED_AMOUNT, {from: OWNER_ACCOUNT})
+    let actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
+    assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
 
-    yield trst.transferFrom(ACCOUNT_ONE, ACCOUNT_THREE, approvedAmount + 1, {from: ACCOUNT_TWO})
-    approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount) // Assure none of the tokens moved
+    yield trst.transferFrom(OWNER_ACCOUNT, RECEIVING_ACCOUNT, APPROVED_AMOUNT + 1, {from: SPENDER_ACCOUNT})
+    actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
+    assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT) // Assure none of the tokens moved
 
-    let accountThreeEndingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
-    assert.equal(accountThreeEndingBalance.toNumber(), accountThreeStartingBalance.toNumber())
+    // See no fudns have been transferred
+    let ownerAccountEndBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    assert.equal(ownerAccountEndBal.toNumber(), ownerAccountStartBal.toNumber())
+    let receivingAccountEndBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
+    assert.equal(receivingAccountEndBal.toNumber(), receivingAccountStartBal.toNumber())
   }))
 })

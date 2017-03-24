@@ -1,7 +1,6 @@
 'use strict'
 
 let co = require("co").wrap
-let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 let consts = require("./utils/consts.js")
 
