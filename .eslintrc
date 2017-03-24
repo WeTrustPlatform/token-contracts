@@ -1,6 +1,8 @@
 {
   "extends": ["eslint:recommended", "./tools/eslint/google.eslintrc.json"],
   "rules": {
+    // allow trailing commas
+    "comma-dangle": 0,
     // make line length 120
     "max-len": [1, 120],
     // make unused vars and functions only a warning
@@ -23,6 +25,7 @@
       "ExampleToken": false,
       "ExampleTrustcoin2": false,
       "it": false,
+      "Migrations": false,
       "module": false,
       "require": false,
       "ROSCA": false,
