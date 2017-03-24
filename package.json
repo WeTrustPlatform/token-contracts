@@ -1,0 +1,30 @@
+{
+  "name": "wetrust-trst-contract",
+  "version": "0.0.1",
+  "description": "WeTrust's TRST token contract",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeTrustPlatform/token-contracts.git"
+  },
+  "keywords": [
+    "WeTrust",
+    "TRST",
+    "token"
+  ],
+  "author": "WeTrust",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WeTrustPlatform/token-contracts/issues"
+  },
+  "homepage": "https://github.com/WeTrustPlatform/token-contracts#readme",
+  "dependencies": {
+    "eslint": "^3.18.0"
+  }
+}
