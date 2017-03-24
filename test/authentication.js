@@ -38,7 +38,7 @@ contract("Authentication", function(accounts_) {
   it("should allow migration finalization only by migration master", co(function* () {
     yield trst.beginMigrationPeriod(trst2.address, {from: MIGRATION_MASTER})
     utils.increaseTime(
-      (yield trst.minimumMigrationDuration.call()) + consts.ONE_WEEK_IN_SECONDS)
+      (yield trst.minimumMigrationDuration.call()).toNumber() + consts.ONE_WEEK_IN_SECONDS)
 
     utils.mineOneBlock()
     yield utils.assertThrows(trst.finalizeOutgoingMigration({from: OWNER, gas: 2.4e6}))
