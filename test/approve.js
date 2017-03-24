@@ -7,10 +7,10 @@ let utils = require("./utils/utils.js")
 contract("Approving and transferring", function(accounts_) {
   let TOTAL_SUPPLY
   let OWNER = accounts_[0]
-  let MIGRATION_MASTER = accounts_[1]
-  let ACCOUNT_ONE = accounts_[2]
-  let ACCOUNT_TWO = accounts_[3]
-  let ACCOUNT_THREE = accounts_[4]
+  let ACCOUNT_ONE = accounts_[1]
+  let ACCOUNT_TWO = accounts_[2]
+  let ACCOUNT_THREE = accounts_[3]
+  let MIGRATION_MASTER = accounts_[9]
 
   before(co(function* () {
     let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
@@ -60,34 +60,5 @@ contract("Approving and transferring", function(accounts_) {
 
     let accountThreeEndingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
     assert.equal(accountThreeEndingBalance.toNumber(), accountThreeStartingBalance.toNumber())
-  }))
-
-  it("should not allow approving unless our approvee's approved balance is 0", co(function* () {
-    let initialAmount = 10
-    let approvedAmount = 5
-    let trst = yield utils.deployTrustcoin(OWNER, MIGRATION_MASTER)
-    yield trst.transfer(ACCOUNT_ONE, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_TWO, initialAmount, {from: OWNER})
-    yield trst.transfer(ACCOUNT_THREE, initialAmount, {from: OWNER})
-    let accountOneStartingBalance = yield trst.balanceOf.call(ACCOUNT_ONE)
-    let accountTwoStartingBalance = yield trst.balanceOf.call(ACCOUNT_TWO)
-    let accountThreeStartingBalance = yield trst.balanceOf.call(ACCOUNT_THREE)
-
-    yield trst.approve(ACCOUNT_TWO, approvedAmount, {from: ACCOUNT_ONE})
-    let approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount)
-
-    yield trst.approve(ACCOUNT_TWO, approvedAmount, {from: ACCOUNT_ONE})
-    approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount)
-
-    yield trst.approve(ACCOUNT_TWO, 0, {from: ACCOUNT_ONE})
-    approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    // i don't know how we get the block number here to compare?
-    assert.notEqual(approvedForAccountTwo.toNumber(), 0)
-
-    yield trst.approve(ACCOUNT_TWO, approvedAmount, {from: ACCOUNT_ONE})
-    approvedForAccountTwo = yield trst.allowance(ACCOUNT_ONE, ACCOUNT_TWO)
-    assert.equal(approvedForAccountTwo.toNumber(), approvedAmount)
   }))
 })

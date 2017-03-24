@@ -1,5 +1,5 @@
 /**
- *  Trustcoin contract, code based on multiple sources:
+ *  TRST Trustcoin contract, code based on multiple sources:
  *
  *  https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/token/ERC20.sol
  *  https://github.com/golemfactory/golem-crowdfunding/tree/master/contracts
@@ -30,11 +30,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   mapping (address => uint256) public balances; // (ERC20)
 
-  // This is an int256 so that we can implement a fix for this weakness in ERC20:
-  // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-  // See the comment on the appove function for our solution outline
-  // @todo explain why this would never overflow
-  mapping (address => mapping (address => int256)) public allowed; // (ERC20)
+  mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
 
   modifier onlyFromMigrationMaster() {
     if (msg.sender != migrationMaster) throw;
@@ -48,6 +44,11 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
+  // WARNING: If you call this with the address of a contract, the contract will receive the
+  // funds, but will have no idea where they came from. Furthermore, if the contract is
+  // not aware of TRST, the tokens will remain locked away in the contract forever.
+  // It is therefore recommended to call compareAndApprove() or approve() and have the contract
+  // withdraw the money using transferFrom() .
   function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
@@ -60,15 +61,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
-    if (
-      balances[_from] >= _value &&
-      allowed[_from][msg.sender] > 0 && 
-      uint256(allowed[_from][msg.sender]) >= _value &&
-      _value > 0
-    ) {
+    if (balances[_from] >= _value &&
+        allowed[_from][msg.sender] >= _value &&
+        _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
-      allowed[_from][msg.sender] -= int256(_value);
+      allowed[_from][msg.sender] -= _value;
       Transfer(_from, _to, _value);
       return true;
     }
@@ -81,33 +79,35 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
+  // NOTE: this message is vulnerable and is placed here only to follow the ERC20 standard.
+  // Before using, please take a look at the better compareAndSave below.
   function approve(address _spender, uint256 _value) external returns (bool) {
-    // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-    // @todo explain this
-    int256 valueToSet = 0;
-    if (
-      allowed[msg.sender][_spender] < 0 &&
-      ((_value != 0) && (allowed[msg.sender][_spender] + int256(block.number)) < 0)
-    ) {
-      // @todo also explain this
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+
+  // A vulernability of the approve method in the ERC20 standard was identified by
+  // Mikhail Vladimirov and Dmitry Khovratovich in http://bit.ly/2obzyE7 .
+  // It's better to use this method which is not susceptible to over-withdrawing by the approvee.
+  //
+  // _oldValue is the previous value approved, which can be retrieved with
+  //  allowance(msg.sender, _spender).
+  // TODO(ron): add tests.
+  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue)
+      external returns(bool) {
+    if (allowed[msg.sender][_spender] != _currentValue) {
       return false;
     }
-    if (_value == 0) {
-      valueToSet = 0 - int256(block.number);
-    } else {
-      valueToSet = int256(_value);
-    }
-    allowed[msg.sender][_spender] = valueToSet;
-    Approval(msg.sender, _spender, uint256(valueToSet));
+    allowed[msg.sender][_spender] = _newValue;
+    Approval(msg.sender, _spender, _newValue);
     return true;
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant external returns (uint256) {
-    if (allowed[_owner][_spender] < 0) return 0;
-    return uint256(allowed[_owner][_spender]);
+  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
+    return allowed[_owner][_spender];
   }
-
 
   //
   //  Migration methods
