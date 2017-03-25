@@ -80,7 +80,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   // NOTE: this message is vulnerable and is placed here only to follow the ERC20 standard.
-  // Before using, please take a look at the better compareAndSave below.
+  // Before using, please take a look at the better compareAndApprove below.
   function approve(address _spender, uint256 _value) external returns (bool) {
     return doApprove(_spender, _value);
   }

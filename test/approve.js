@@ -26,13 +26,24 @@ contract("Approving and transferring", function(accounts_) {
     let actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
     assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
 
-    yield trst.transferFrom(OWNER_ACCOUNT, RECEIVING_ACCOUNT, APPROVED_AMOUNT, {from: SPENDER_ACCOUNT})
-    let actualAccount1EndBalance = yield trst.balanceOf.call(OWNER_ACCOUNT)
-    assert.equal(actualAccount1EndBalance.toNumber(), (ownerAccountStartBal.toNumber() - APPROVED_AMOUNT))
-    let receivingAccountEndBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
-    assert.equal(receivingAccountEndBal.toNumber(), (receivingAccountStartBal.toNumber() + APPROVED_AMOUNT))
+    const FIRST_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - 1
+    yield trst.transferFrom(
+      OWNER_ACCOUNT, RECEIVING_ACCOUNT, FIRST_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
+    assert.equal(yield trst.balanceOf.call(OWNER_ACCOUNT),
+                 ownerAccountStartBal.toNumber() - FIRST_TRANSFERRED_AMOUNT)
+    assert.equal((yield trst.balanceOf.call(RECEIVING_ACCOUNT)).toNumber(),
+                 receivingAccountStartBal.toNumber() + FIRST_TRANSFERRED_AMOUNT)
     actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
-    assert.equal(actualApprovalForSpendingAccount.toNumber(), 0)
+
+    const REMAINDER_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - FIRST_TRANSFERRED_AMOUNT
+    yield trst.transferFrom(
+      OWNER_ACCOUNT, RECEIVING_ACCOUNT, REMAINDER_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
+    assert.equal((yield trst.balanceOf.call(OWNER_ACCOUNT)).toNumber(),
+                 INITIAL_AMOUNT - APPROVED_AMOUNT)
+    assert.equal((yield trst.balanceOf.call(RECEIVING_ACCOUNT)).toNumber(),
+                 receivingAccountStartBal.toNumber() + APPROVED_AMOUNT)
+
+    assert.equal(yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT), 0)
   }))
 
   it("should not allow transferring more than an account's approved balance", co(function* () {
