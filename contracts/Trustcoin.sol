@@ -1,5 +1,5 @@
 /**
- *  Trustcoin contract, code based on multiple sources:
+ *  TRST Trustcoin contract, code based on multiple sources:
  *
  *  https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/token/ERC20.sol
  *  https://github.com/golemfactory/golem-crowdfunding/tree/master/contracts
@@ -7,7 +7,7 @@
  *  https://github.com/ConsenSys/Tokens/blob/master/Token_Contracts/contracts/HumanStandardToken.sol
  */
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 import './deps/ERC20TokenInterface.sol';
 import './deps/SafeMath.sol';
@@ -29,6 +29,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
   mapping (address => uint256) public balances; // (ERC20)
+
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
 
   modifier onlyFromMigrationMaster() {
@@ -43,6 +44,11 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
+  // WARNING: If you call this with the address of a contract, the contract will receive the
+  // funds, but will have no idea where they came from. Furthermore, if the contract is
+  // not aware of TRST, the tokens will remain locked away in the contract forever.
+  // It is therefore recommended to call compareAndApprove() or approve() and have the contract
+  // withdraw the money using transferFrom() .
   function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
@@ -55,7 +61,9 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
-    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+    if (balances[_from] >= _value &&
+        allowed[_from][msg.sender] >= _value &&
+        _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= _value;
@@ -71,17 +79,31 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
+  // NOTE: this message is vulnerable and is placed here only to follow the ERC20 standard.
+  // Before using, please take a look at the better compareAndApprove below.
   function approve(address _spender, uint256 _value) external returns (bool) {
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
+    return doApprove(_spender, _value);
+  }
+
+  // A vulernability of the approve method in the ERC20 standard was identified by
+  // Mikhail Vladimirov and Dmitry Khovratovich in http://bit.ly/2obzyE7 .
+  // It's better to use this method which is not susceptible to over-withdrawing by the approvee.
+  //
+  // _oldValue is the previous value approved, which can be retrieved with
+  //  allowance(msg.sender, _spender).
+  // TODO(ron): add tests.
+  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue)
+      external returns(bool) {
+    if (allowed[msg.sender][_spender] != _currentValue) {
+      return false;
+    }
+    doApprove(_spender, _newValue);
   }
 
   // See ERC20
-  function allowance(address _owner, address _spender) constant external returns (uint256) {
+  function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
-
 
   //
   //  Migration methods
@@ -122,6 +144,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     totalMigrated = safeAdd(totalMigrated, _value);
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
+  }
+
+  function doApprove(address _spender, uint256 _value) internal returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
   }
 
 }
