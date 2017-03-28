@@ -146,6 +146,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     OutgoingMigration(msg.sender, _value);
   }
 
+  // INTERNAL FUNCTIONS
   function doApprove(address _spender, uint256 _value) internal returns (bool) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
