@@ -4,7 +4,7 @@ let co = require("co").wrap
 let assert = require('chai').assert
 let utils = require("./utils/utils.js")
 
-contract("Approving and transferring", function(accounts_) {
+contract("approve, allowance and transferFrom", function(accounts_) {
   let DEPLOYER_ACCOUNT = accounts_[0]
   let OWNER_ACCOUNT = accounts_[1]
   let SPENDER_ACCOUNT = accounts_[2]

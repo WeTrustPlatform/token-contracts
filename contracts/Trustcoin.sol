@@ -49,6 +49,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // not aware of TRST, the tokens will remain locked away in the contract forever.
   // It is therefore recommended to call compareAndApprove() or approve() and have the contract
   // withdraw the money using transferFrom() .
+  // TODO(ron): add tests
   function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
@@ -91,7 +92,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   //
   // _oldValue is the previous value approved, which can be retrieved with
   //  allowance(msg.sender, _spender).
-  // TODO(ron): add tests.
   function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue)
       external returns(bool) {
     if (allowed[msg.sender][_spender] != _currentValue) {
@@ -146,6 +146,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     OutgoingMigration(msg.sender, _value);
   }
 
+  // INTERNAL FUNCTIONS
   function doApprove(address _spender, uint256 _value) internal returns (bool) {
     allowed[msg.sender][_spender] = _value;
     Approval(msg.sender, _spender, _value);
