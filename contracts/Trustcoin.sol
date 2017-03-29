@@ -20,7 +20,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   uint256 public constant decimals = 6;
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
-  uint256 public constant minimumMigrationDuration = 26 weeks; // Minumum allowed migration period
+  uint256 public constant minimumMigrationDuration = 26 weeks; // Minimum allowed migration period
   uint256 public totalSupply = 100000000 * (10 ** decimals); // One hundred million (ERC20)
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   IncomingMigrationTokenInterface public newToken;
@@ -29,7 +29,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   address public migrationMaster; // The Ethereum address which is allowed to set the new token's address
 
   mapping (address => uint256) public balances; // (ERC20)
-
   mapping (address => mapping (address => uint256)) public allowed; // (ERC20)
 
   modifier onlyFromMigrationMaster() {
@@ -48,8 +47,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // funds, but will have no idea where they came from. Furthermore, if the contract is
   // not aware of TRST, the tokens will remain locked away in the contract forever.
   // It is therefore recommended to call compareAndApprove() or approve() and have the contract
-  // withdraw the money using transferFrom() .
-  // TODO(ron): add tests
+  // withdraw the money using transferFrom().
   function transfer(address _to, uint256 _value) external returns (bool) {
     if (balances[msg.sender] >= _value && _value > 0) {
       balances[msg.sender] -= _value;
@@ -62,9 +60,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   // See ERC20
   function transferFrom(address _from, address _to, uint256 _value) external returns (bool) {
-    if (balances[_from] >= _value &&
-        allowed[_from][msg.sender] >= _value &&
-        _value > 0) {
+    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
       balances[_to] += _value;
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= _value;
@@ -80,24 +76,31 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See ERC20
-  // NOTE: this message is vulnerable and is placed here only to follow the ERC20 standard.
+  // NOTE: this method is vulnerable and is placed here only to follow the ERC20 standard.
   // Before using, please take a look at the better compareAndApprove below.
   function approve(address _spender, uint256 _value) external returns (bool) {
     return doApprove(_spender, _value);
   }
 
   // A vulernability of the approve method in the ERC20 standard was identified by
-  // Mikhail Vladimirov and Dmitry Khovratovich in http://bit.ly/2obzyE7 .
+  // Mikhail Vladimirov and Dmitry Khovratovich in this Google Doc:
+  // https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM
   // It's better to use this method which is not susceptible to over-withdrawing by the approvee.
   //
-  // _oldValue is the previous value approved, which can be retrieved with
-  //  allowance(msg.sender, _spender).
-  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue)
-      external returns(bool) {
+  /// @param _oldValue The previous value approved, which can be retrieved with allowance(msg.sender, _spender)
+  /// @return bool Whether the approval was a success (see ERC20's `approve`)
+  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue) external returns(bool) {
     if (allowed[msg.sender][_spender] != _currentValue) {
       return false;
     }
     doApprove(_spender, _newValue);
+  }
+
+  // INTERNAL FUNCTIONS
+  function doApprove(address _spender, uint256 _value) internal returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
   }
 
   // See ERC20
@@ -144,13 +147,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     totalMigrated = safeAdd(totalMigrated, _value);
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
-  }
-
-  // INTERNAL FUNCTIONS
-  function doApprove(address _spender, uint256 _value) internal returns (bool) {
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
   }
 
 }
