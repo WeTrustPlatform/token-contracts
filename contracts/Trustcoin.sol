@@ -10,11 +10,10 @@
 pragma solidity ^0.4.8;
 
 import './deps/ERC20TokenInterface.sol';
-import './deps/SafeMath.sol';
 import './deps/OutgoingMigrationTokenInterface.sol';
 import './deps/IncomingMigrationTokenInterface.sol';
 
-contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
+contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface {
 
   string public constant name = 'Trustcoin';
   uint256 public constant decimals = 6;
@@ -148,9 +147,9 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   function migrateToNewContract(uint256 _value) public {
     if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
-    balances[msg.sender] = safeSub(balances[msg.sender], _value);
-    totalTokens = safeSub(totalTokens, _value);
-    totalMigrated = safeAdd(totalMigrated, _value);
+    balances[msg.sender] -= _value;
+    totalTokens -= _value;
+    totalMigrated += _value;
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
   }
