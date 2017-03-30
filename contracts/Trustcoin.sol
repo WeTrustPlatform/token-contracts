@@ -101,13 +101,6 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface {
     return doApprove(_spender, _newValue);
   }
 
-  // INTERNAL FUNCTIONS
-  function doApprove(address _spender, uint256 _value) internal returns (bool) {
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
-    return true;
-  }
-
   // See ERC20
   function allowance(address _owner, address _spender) constant external returns (uint256 remaining) {
     return allowed[_owner][_spender];
@@ -152,6 +145,21 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface {
     totalMigrated += _value;
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
+  }
+
+  //
+  // Internal functions
+  //
+
+  // Performs the equivalent of a successful call to ERC20's approve method, but is used
+  // internally by our compareAndApprove method
+  /// @param _spender The address to approve
+  /// @param _value The value to approve, this replaces any old value
+  /// @return bool Whether the approval was a success
+  function doApprove(address _spender, uint256 _value) internal returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
   }
 
 }
