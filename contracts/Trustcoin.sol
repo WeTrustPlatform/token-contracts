@@ -21,7 +21,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   string public constant symbol = 'TRST';
   string public constant version = 'TRST1.0';
   uint256 public constant minimumMigrationDuration = 26 weeks; // Minimum allowed migration period
-  uint256 public totalSupply = 100000000 * (10 ** decimals); // One hundred million (ERC20)
+  uint256 private totalTokens = 100000000 * (10 ** decimals); // One hundred million
   uint256 public totalMigrated; // Begins at 0 and increments as tokens are migrated to a new contract
   IncomingMigrationTokenInterface public newToken;
   uint256 public allowOutgoingMigrationsUntilAtLeast;
@@ -39,7 +39,12 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   function Trustcoin(address _migrationMaster) {
     if (_migrationMaster == 0) throw;
     migrationMaster = _migrationMaster;
-    balances[msg.sender] = totalSupply;
+    balances[msg.sender] = totalTokens;
+  }
+
+  // See ERC20
+  function totalSupply() constant returns (uint256) {
+    return totalTokens;
   }
 
   // See ERC20
@@ -86,7 +91,9 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // Mikhail Vladimirov and Dmitry Khovratovich in this Google Doc:
   // https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM
   // It's better to use this method which is not susceptible to over-withdrawing by the approvee.
-  /// @param _oldValue The previous value approved, which can be retrieved with allowance(msg.sender, _spender)
+  /// @param _spender The address to approve
+  /// @param _currentValue The previous value approved, which can be retrieved with allowance(msg.sender, _spender)
+  /// @param _newValue The new value to approve, this will replace the _currentValue
   /// @return bool Whether the approval was a success (see ERC20's `approve`)
   function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue) external returns(bool) {
     if (allowed[msg.sender][_spender] != _currentValue) {
@@ -142,7 +149,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
     if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
     balances[msg.sender] = safeSub(balances[msg.sender], _value);
-    totalSupply = safeSub(totalSupply, _value);
+    totalTokens = safeSub(totalTokens, _value);
     totalMigrated = safeAdd(totalMigrated, _value);
     newToken.migrateFromOldContract(msg.sender, _value);
     OutgoingMigration(msg.sender, _value);
