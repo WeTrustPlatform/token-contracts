@@ -86,7 +86,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   //
 
   // See IncomingMigrationTokenInterface
-  function migrateFromOldContract(address _from, uint256 _value) onlyFromOldToken external {
+  function migrateFromOldContract(address _from, uint256 _value) onlyFromOldToken public {
     if (!allowIncomingMigrations) throw;
     if (_value == 0) throw;
     totalSupply = safeAdd(totalSupply, _value);
@@ -95,7 +95,7 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   }
 
   // See IncomingMigrationTokenInterface
-  function finalizeIncomingMigration() onlyFromOldToken external {
+  function finalizeIncomingMigration() onlyFromOldToken public {
     if (!allowIncomingMigrations) throw;
     allowIncomingMigrations = false;
     IncomingMigrationFinalized();

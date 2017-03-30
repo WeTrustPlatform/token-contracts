@@ -95,7 +95,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   /// @param _currentValue The previous value approved, which can be retrieved with allowance(msg.sender, _spender)
   /// @param _newValue The new value to approve, this will replace the _currentValue
   /// @return bool Whether the approval was a success (see ERC20's `approve`)
-  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue) external returns(bool) {
+  function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue) public returns(bool) {
     if (allowed[msg.sender][_spender] != _currentValue) {
       return false;
     }
@@ -120,13 +120,13 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
 
   /// Changes the owner for the migration behaviour
   /// @param _master Address of the user who has control of setting the new token's address
-  function changeMigrationMaster(address _master) onlyFromMigrationMaster external {
+  function changeMigrationMaster(address _master) onlyFromMigrationMaster public {
     if (_master == 0) throw;
     migrationMaster = _master;
   }
 
   // See OutgoingMigrationTokenInterface
-  function finalizeOutgoingMigration() onlyFromMigrationMaster external {
+  function finalizeOutgoingMigration() onlyFromMigrationMaster public {
     if (!allowOutgoingMigrations) throw;
     if (now < allowOutgoingMigrationsUntilAtLeast) throw;
     newToken.finalizeIncomingMigration();
@@ -134,7 +134,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See OutgoingMigrationTokenInterface
-  function beginMigrationPeriod(address _newTokenAddress) onlyFromMigrationMaster external {
+  function beginMigrationPeriod(address _newTokenAddress) onlyFromMigrationMaster public {
     if (allowOutgoingMigrations) throw; // Ensure we haven't already started allowing migrations
     if (_newTokenAddress == 0) throw;
     if (newTokenAddress != 0) throw;
@@ -145,7 +145,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   }
 
   // See OutgoingMigrationTokenInterface
-  function migrateToNewContract(uint256 _value) external {
+  function migrateToNewContract(uint256 _value) public {
     if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
     balances[msg.sender] = safeSub(balances[msg.sender], _value);
