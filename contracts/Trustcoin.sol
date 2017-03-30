@@ -86,14 +86,13 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface, Safe
   // Mikhail Vladimirov and Dmitry Khovratovich in this Google Doc:
   // https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM
   // It's better to use this method which is not susceptible to over-withdrawing by the approvee.
-  //
   /// @param _oldValue The previous value approved, which can be retrieved with allowance(msg.sender, _spender)
   /// @return bool Whether the approval was a success (see ERC20's `approve`)
   function compareAndApprove(address _spender, uint256 _currentValue, uint256 _newValue) external returns(bool) {
     if (allowed[msg.sender][_spender] != _currentValue) {
       return false;
     }
-    doApprove(_spender, _newValue);
+    return doApprove(_spender, _newValue);
   }
 
   // INTERNAL FUNCTIONS
