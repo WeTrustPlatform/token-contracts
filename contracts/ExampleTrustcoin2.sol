@@ -13,16 +13,15 @@
 pragma solidity ^0.4.7;
 
 import './deps/ERC20TokenInterface.sol';
-import './deps/SafeMath.sol';
 import './Trustcoin.sol';
 
-contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterface, SafeMath {
+contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterface {
 
   string public constant name = 'Trustcoin2';
   uint8 public constant decimals = 6;
   string public constant symbol = 'TRST2';
   string public constant version = 'TRST2.0';
-  uint256 public totalSupply = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
+  uint256 private totalTokens = 0; // Begins at 0, but increments as old tokens are migrated into this contract (ERC20)
   address public oldTokenAddress = 0; // @todo replace with real token address
   bool public allowIncomingMigrations = true; // Is set to false when we finalize migration
 
@@ -39,6 +38,11 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   function ExampleTrustcoin2(address _oldTokenAddress) {
     if (_oldTokenAddress == 0) throw;
     oldTokenAddress = _oldTokenAddress;
+  }
+
+  // See ERC20
+  function totalSupply() constant returns (uint256) {
+    return totalTokens;
   }
 
   // See ERC20
@@ -86,16 +90,16 @@ contract ExampleTrustcoin2 is IncomingMigrationTokenInterface, ERC20TokenInterfa
   //
 
   // See IncomingMigrationTokenInterface
-  function migrateFromOldContract(address _from, uint256 _value) onlyFromOldToken external {
+  function migrateFromOldContract(address _from, uint256 _value) onlyFromOldToken public {
     if (!allowIncomingMigrations) throw;
     if (_value == 0) throw;
-    totalSupply = safeAdd(totalSupply, _value);
-    balances[_from] = safeAdd(balances[_from], _value);
+    totalTokens += _value;
+    balances[_from] += _value;
     IncomingMigration(_from, _value);
   }
 
   // See IncomingMigrationTokenInterface
-  function finalizeIncomingMigration() onlyFromOldToken external {
+  function finalizeIncomingMigration() onlyFromOldToken public {
     if (!allowIncomingMigrations) throw;
     allowIncomingMigrations = false;
     IncomingMigrationFinalized();

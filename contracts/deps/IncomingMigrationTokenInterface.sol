@@ -14,7 +14,7 @@ contract IncomingMigrationTokenInterface {
   /// should only be permitted when msg.sender is the old token.
   /// @param _from Address of the user we're migrating the tokens of
   /// @param _value Number of tokens to be migrated
-  function migrateFromOldContract(address _from, uint256 _value) external;
+  function migrateFromOldContract(address _from, uint256 _value) public;
 
   /// Ends the possibility for any more tokens to be migrated from the old
   /// contract to the new one. It's not strictly necessary to have our own
@@ -23,7 +23,7 @@ contract IncomingMigrationTokenInterface {
   /// only has to listen to the new contract to know when finalization happens.
   /// Implementations of this should feel free to ignore this functionality at
   /// their own discretion.
-  function finalizeIncomingMigration() external;
+  function finalizeIncomingMigration() public;
 
   event IncomingMigration(address _from, uint256 _value);
 
