@@ -140,6 +140,7 @@ contract Trustcoin is OutgoingMigrationTokenInterface, ERC20TokenInterface {
   function migrateToNewContract(uint256 _value) public {
     if (!allowOutgoingMigrations) throw;
     if (_value == 0) throw;
+    if (balances[msg.sender] < _value) throw;
     balances[msg.sender] -= _value;
     totalTokens -= _value;
     totalMigrated += _value;
