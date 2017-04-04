@@ -1,5 +1,7 @@
 pragma solidity ^0.4.7;
 
+// This contract is only used for the truffle IDE. It is not part of the Trustcoin
+// contract.
 contract Migrations {
   address public owner;
   uint public last_completed_migration;

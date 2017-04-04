@@ -22,10 +22,13 @@ contract("approve, allowance and transferFrom", function(accounts_) {
     let ownerAccountStartBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
     let receivingAccountStartBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
 
+    // Approve and check allowance
     yield trst.approve(SPENDER_ACCOUNT, APPROVED_AMOUNT, {from: OWNER_ACCOUNT})
     let actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
     assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
 
+    // Transfer in 2 txs:
+    // First transfer tx
     const FIRST_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - 1
     yield trst.transferFrom(
       OWNER_ACCOUNT, RECEIVING_ACCOUNT, FIRST_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
@@ -35,6 +38,7 @@ contract("approve, allowance and transferFrom", function(accounts_) {
                  receivingAccountStartBal.toNumber() + FIRST_TRANSFERRED_AMOUNT)
     actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
 
+    // Second transfer tx
     const REMAINDER_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - FIRST_TRANSFERRED_AMOUNT
     yield trst.transferFrom(
       OWNER_ACCOUNT, RECEIVING_ACCOUNT, REMAINDER_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
@@ -60,9 +64,33 @@ contract("approve, allowance and transferFrom", function(accounts_) {
 
     yield trst.transferFrom(OWNER_ACCOUNT, RECEIVING_ACCOUNT, APPROVED_AMOUNT + 1, {from: SPENDER_ACCOUNT})
     actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
-    assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT) // Assure none of the tokens moved
+    assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
 
-    // See no fudns have been transferred
+    // See no funds have been transferred
+    let ownerAccountEndBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    assert.equal(ownerAccountEndBal.toNumber(), ownerAccountStartBal.toNumber())
+    let receivingAccountEndBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
+    assert.equal(receivingAccountEndBal.toNumber(), receivingAccountStartBal.toNumber())
+  }))
+
+  it("should not allow transferring more than an account's balance even if allowance is greater", co(function* () {
+    let trst = yield utils.deployTrustcoin(DEPLOYER_ACCOUNT, MIGRATION_MASTER)
+    // Let owner have less than the approved amount.
+    yield trst.transfer(OWNER_ACCOUNT, APPROVED_AMOUNT - 1, {from: DEPLOYER_ACCOUNT})
+    yield trst.transfer(RECEIVING_ACCOUNT, INITIAL_AMOUNT, {from: DEPLOYER_ACCOUNT})
+    let ownerAccountStartBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
+    let receivingAccountStartBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
+
+    yield trst.approve(SPENDER_ACCOUNT, APPROVED_AMOUNT, {from: OWNER_ACCOUNT})
+
+    yield trst.transferFrom(OWNER_ACCOUNT, RECEIVING_ACCOUNT, APPROVED_AMOUNT, {from: SPENDER_ACCOUNT})
+
+    // Transfer should fail because transfer amount was more than the balance.
+    let actualApprovalForSpendingAccount =
+        (yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)).toNumber()
+    assert.equal(actualApprovalForSpendingAccount, APPROVED_AMOUNT)
+
+    // No funds should have been transferred
     let ownerAccountEndBal = yield trst.balanceOf.call(OWNER_ACCOUNT)
     assert.equal(ownerAccountEndBal.toNumber(), ownerAccountStartBal.toNumber())
     let receivingAccountEndBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
