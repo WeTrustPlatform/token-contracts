@@ -33,7 +33,7 @@ module.exports = {
       method: "evm_increaseTime",
       params: [bySeconds],
       id: new Date().getTime(),
-    });
+    })
   },
 
   mineOneBlock: function() {
@@ -41,7 +41,7 @@ module.exports = {
       jsonrpc: "2.0",
       method: "evm_mine",
       id: new Date().getTime(),
-    });
+    })
   },
 
   getGasUsage: function(transactionPromise, extraData) {
@@ -52,8 +52,8 @@ module.exports = {
           extraData: extraData,
         })
       }).catch(function(reason) {
-        reject(reason);
+        reject(reason)
       })
     })
   },
-};
+}

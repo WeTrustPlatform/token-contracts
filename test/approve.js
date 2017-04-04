@@ -2,6 +2,7 @@
 
 let co = require("co").wrap
 let assert = require('chai').assert
+let Promise = require("bluebird")
 let utils = require("./utils/utils.js")
 
 contract("approve, allowance and transferFrom", function(accounts_) {
@@ -23,15 +24,43 @@ contract("approve, allowance and transferFrom", function(accounts_) {
     let receivingAccountStartBal = yield trst.balanceOf.call(RECEIVING_ACCOUNT)
 
     // Approve and check allowance
+    let approvalEventFired = false
+    let approvalEvent = trst.Approval()  // eslint-disable-line new-cap
+    approvalEvent.watch(function(error, log) {
+      assert.isNotOk(error)
+      approvalEvent.stopWatching()
+      approvalEventFired = true
+      assert.equal(log.args.owner, OWNER_ACCOUNT)
+      assert.equal(log.args.spender, SPENDER_ACCOUNT)
+      assert.equal(log.args.value.toNumber(), APPROVED_AMOUNT)
+    })
+
     yield trst.approve(SPENDER_ACCOUNT, APPROVED_AMOUNT, {from: OWNER_ACCOUNT})
     let actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
     assert.equal(actualApprovalForSpendingAccount.toNumber(), APPROVED_AMOUNT)
+    // A bit of a hack to catch the event.
+    yield Promise.delay(300)
+    assert.isOk(approvalEventFired)
+
 
     // Transfer in 2 txs:
     // First transfer tx
+    let transfer1EventFired = false
+    let transfer1Event = trst.Transfer()  // eslint-disable-line new-cap
+    transfer1Event.watch(function(error, log) {
+      assert.isNotOk(error)
+      transfer1Event.stopWatching()
+      transfer1EventFired = true
+      assert.equal(log.args.from, OWNER_ACCOUNT)
+      assert.equal(log.args.to, RECEIVING_ACCOUNT)
+      assert.equal(log.args.value.toNumber(), FIRST_TRANSFERRED_AMOUNT)
+    })
     const FIRST_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - 1
     yield trst.transferFrom(
       OWNER_ACCOUNT, RECEIVING_ACCOUNT, FIRST_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
+
+    yield Promise.delay(300)
+    assert.isOk(transfer1EventFired)
     assert.equal(yield trst.balanceOf.call(OWNER_ACCOUNT),
                  ownerAccountStartBal.toNumber() - FIRST_TRANSFERRED_AMOUNT)
     assert.equal((yield trst.balanceOf.call(RECEIVING_ACCOUNT)).toNumber(),
@@ -39,9 +68,22 @@ contract("approve, allowance and transferFrom", function(accounts_) {
     actualApprovalForSpendingAccount = yield trst.allowance(OWNER_ACCOUNT, SPENDER_ACCOUNT)
 
     // Second transfer tx
+    let transfer2EventFired = false
+    let transfer2Event = trst.Transfer()  // eslint-disable-line new-cap
+    transfer2Event.watch(function(error, log) {
+      assert.isNotOk(error)
+      transfer2Event.stopWatching()
+      transfer2EventFired = true
+      assert.equal(log.args.from, OWNER_ACCOUNT)
+      assert.equal(log.args.to, RECEIVING_ACCOUNT)
+      assert.equal(log.args.value.toNumber(), REMAINDER_TRANSFERRED_AMOUNT)
+    })
+
     const REMAINDER_TRANSFERRED_AMOUNT = APPROVED_AMOUNT - FIRST_TRANSFERRED_AMOUNT
     yield trst.transferFrom(
       OWNER_ACCOUNT, RECEIVING_ACCOUNT, REMAINDER_TRANSFERRED_AMOUNT, {from: SPENDER_ACCOUNT})
+    yield Promise.delay(300)
+    assert.isOk(transfer2EventFired)
     assert.equal((yield trst.balanceOf.call(OWNER_ACCOUNT)).toNumber(),
                  INITIAL_AMOUNT - APPROVED_AMOUNT)
     assert.equal((yield trst.balanceOf.call(RECEIVING_ACCOUNT)).toNumber(),

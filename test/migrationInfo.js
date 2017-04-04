@@ -18,7 +18,7 @@ contract("MigrationInfo", function(accounts_) {
       co(function* () {
     const NEW_MIGRATION_INFO = "Migration has started, send everything to 0xSomething"
 
-    let oldMigrationInfo = yield trst.migrationInfo.call();
+    let oldMigrationInfo = yield trst.migrationInfo.call()
     // Unsuccessful
     yield utils.assertThrows(trst.setMigrationInfo(NEW_MIGRATION_INFO, {from: OWNER}))
     assert.equal(yield trst.migrationInfo.call(), oldMigrationInfo)
