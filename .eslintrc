@@ -23,7 +23,6 @@
       "contract": false,
       "ERC20TokenInterface": false,
       "ExampleToken": false,
-      "ExampleTrustcoin2": false,
       "it": false,
       "Migrations": false,
       "module": false,
