@@ -130,8 +130,9 @@ contract Trustcoin is ERC20TokenInterface {
     MigrationInfoSet(_migrationInfo);
   }
 
-  // To be used if the contract owner wishes to transfer the migrationInfoSetter to a new account,
-  // e.g. because of change in personnel, a concern that account may have been compromised etc.
+  // To be used if the migrationInfoSetter wishes to transfer the migrationInfoSetter
+  // permission to a new account, e.g. because of change in personnel, a concern that account
+  // may have been compromised etc.
   /// @param _newMigrationInfoSetter The address of the new Migration Info Setter
   function changeMigrationInfoSetter(address _newMigrationInfoSetter) onlyFromMigrationInfoSetter public {
     migrationInfoSetter = _newMigrationInfoSetter;
