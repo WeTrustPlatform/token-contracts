@@ -27,10 +27,6 @@ module.exports = {
     return Trustcoin.new(migrationMaster, {from: owner, gas: 2400000})
   },
 
-  deployExampleTrustcoin2: function(owner, oldTokenAddress) {
-    return ExampleTrustcoin2.new(oldTokenAddress, {from: owner, gas: 2400000})
-  },
-
   increaseTime: function(bySeconds) {
     myWeb3.currentProvider.send({
       jsonrpc: "2.0",
