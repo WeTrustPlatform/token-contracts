@@ -2,7 +2,7 @@
 
 let assert = require('chai').assert
 let co = require("co").wrap
-let Promise = require("bluebird");
+let Promise = require("bluebird")
 let utils = require("./utils/utils.js")
 
 contract("Sending and receiving", function(accounts_) {
@@ -22,20 +22,20 @@ contract("Sending and receiving", function(accounts_) {
     let accountTwoStartingBalance = yield trst.balanceOf.call(MIGRATION_MASTER)
 
     let transferEventFired = false
-    let transferEvent = trst.Transfer();  // eslint-disable-line new-cap
+    let transferEvent = trst.Transfer()  // eslint-disable-line new-cap
     transferEvent.watch(function(error, log) {
       assert.isNotOk(error)
-      transferEvent.stopWatching();
-      transferEventFired = true;
-      assert.equal(log.args.from, OWNER);
-      assert.equal(log.args.to, MIGRATION_MASTER);
-      assert.equal(log.args.value.toNumber(), amount);
-    });
+      transferEvent.stopWatching()
+      transferEventFired = true
+      assert.equal(log.args.from, OWNER)
+      assert.equal(log.args.to, MIGRATION_MASTER)
+      assert.equal(log.args.value.toNumber(), amount)
+    })
 
     yield trst.transfer(MIGRATION_MASTER, amount, {from: OWNER})
 
     // A bit of a hack to catch the event.
-    yield Promise.delay(300);
+    yield Promise.delay(300)
     assert.isOk(transferEventFired)
 
     let accountOneEndingBalance = yield trst.balanceOf.call(OWNER)
@@ -52,11 +52,11 @@ contract("Sending and receiving", function(accounts_) {
     let accountOneStartingBalance = yield trst.balanceOf.call(OWNER)
     let accountTwoStartingBalance = yield trst.balanceOf.call(MIGRATION_MASTER)
 
-    let transferEvent = trst.Transfer();  // eslint-disable-line new-cap
+    let transferEvent = trst.Transfer()  // eslint-disable-line new-cap
     transferEvent.watch(function(error, log) {
-      transferEvent.stopWatching();
+      transferEvent.stopWatching()
       assert.isNotOk(true, "Transfer event fired when it shouldn't have")
-    });
+    })
 
     yield trst.transfer(OWNER, accountTwoStartingBalance + amount, {from: MIGRATION_MASTER})
 
