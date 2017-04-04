@@ -80,9 +80,7 @@ contract Trustcoin is ERC20TokenInterface {
     if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value) {
       balances[_from] -= _value;
       allowed[_from][msg.sender] -= _value;
-
       balances[_to] += _value;
-
       Transfer(_from, _to, _value);
       return true;
     }
@@ -123,7 +121,10 @@ contract Trustcoin is ERC20TokenInterface {
     return allowed[_owner][_spender];
   }
 
-  // MigrationInfo functions
+  // Allows setting a descriptive string, which will aid any users in migrating their token
+  // to a newer version of the contract. This field provides a kind of 'double-layer' of
+  // authentication for any migration announcement, as it can only be set by WeTrust.
+  /// @param _migrationInfo The information string to be stored on the contract
   function setMigrationInfo(string _migrationInfo) onlyFromMigrationInfoSetter public {
     migrationInfo = _migrationInfo;
     MigrationInfoSet(_migrationInfo);
@@ -131,6 +132,7 @@ contract Trustcoin is ERC20TokenInterface {
 
   // To be used if the contract owner wishes to transfer the migrationInfoSetter to a new account,
   // e.g. because of change in personnel, a concern that account may have been compromised etc.
+  /// @param _newMigrationInfoSetter The address of the new Migration Info Setter
   function changeMigrationInfoSetter(address _newMigrationInfoSetter) onlyFromMigrationInfoSetter public {
     migrationInfoSetter = _newMigrationInfoSetter;
   }
