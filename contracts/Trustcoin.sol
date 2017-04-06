@@ -20,7 +20,7 @@ contract Trustcoin is ERC20TokenInterface {
   string public constant version = 'TRST1.0';
 
   // One hundred million coins, each divided to up to 10^decimals units.
-  uint256 private totalTokens = 100000000 * (10 ** decimals);
+  uint256 private constant totalTokens = 100000000 * (10 ** decimals);
 
   mapping (address => uint256) public balances; // (ERC20)
   // A mapping from an account owner to a map from approved spender to their allowances.
@@ -33,7 +33,7 @@ contract Trustcoin is ERC20TokenInterface {
   // This is to be used when migration to a new contract starts.
   // This string can be used for any authorative information re the migration
   // (e.g. address to use for migration, or URL to explain where to find more info)
-  string public migrationInfo = "";
+  string public migrationInfo;
 
   // The only address that can set migrationContractAddress, a secure multisig.
   address public migrationInfoSetter = 0;
@@ -52,6 +52,7 @@ contract Trustcoin is ERC20TokenInterface {
     migrationInfoSetter = _migrationInfoSetter;
     // Upon creation, all tokens belong to the deployer.
     balances[msg.sender] = totalTokens;
+    migrationInfo = "";
   }
 
   // See ERC20
