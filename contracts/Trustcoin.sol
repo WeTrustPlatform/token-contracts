@@ -33,10 +33,10 @@ contract Trustcoin is ERC20TokenInterface {
   // This is to be used when migration to a new contract starts.
   // This string can be used for any authorative information re the migration
   // (e.g. address to use for migration, or URL to explain where to find more info)
-  string public migrationInfo;
+  string public migrationInfo = "";
 
   // The only address that can set migrationContractAddress, a secure multisig.
-  address public migrationInfoSetter = 0;
+  address public migrationInfoSetter;
 
   //// Modifiers ////
   modifier onlyFromMigrationInfoSetter {
@@ -52,7 +52,6 @@ contract Trustcoin is ERC20TokenInterface {
     migrationInfoSetter = _migrationInfoSetter;
     // Upon creation, all tokens belong to the deployer.
     balances[msg.sender] = totalTokens;
-    migrationInfo = "";
   }
 
   // See ERC20
