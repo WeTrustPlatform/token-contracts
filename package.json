@@ -1,6 +1,6 @@
 {
   "name": "wetrust-trst-contract",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "WeTrust's TRST token contract",
   "main": "index.js",
   "directories": {
