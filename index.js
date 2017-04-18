@@ -25,7 +25,7 @@ function compileSource (input, callback) {
   })
 }
 
-let main = co(function*() {
+let main = cowrap(function*() {
   let compilerInput = {
     'Trustcoin.sol': getContractContents(trustcoinSourcePath),
     'deps/ERC20TokenInterface.sol': getContractContents(trustcoinDepPath)
