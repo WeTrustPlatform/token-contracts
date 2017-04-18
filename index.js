@@ -3,8 +3,8 @@ let solc = require('solc');
 let cowrap = require('co')
 let path = require('path')
 
-let trustcoinSourcePath = path.join(__dirname, '../../contracts/Trustcoin.sol')
-let trustcoinDepPath = path.join(__dirname, '../../contracts/deps/ERC20TokenInterface.sol')
+let trustcoinSourcePath = path.join(__dirname, './contracts/Trustcoin.sol')
+let trustcoinDepPath = path.join(__dirname, './contracts/deps/ERC20TokenInterface.sol')
 
 const SOLC_VERSION = 'v0.4.8+commit.60cc1668'
 
