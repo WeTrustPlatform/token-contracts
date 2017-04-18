@@ -1,6 +1,6 @@
 let fs = require('fs');
 let solc = require('solc');
-let co = require('co').wrap
+let cowrap = require('co')
 let path = require('path')
 
 let trustcoinSourcePath = path.join(__dirname, '../../contracts/Trustcoin.sol')
@@ -14,12 +14,14 @@ function getContractContents(filepath) {
 }
 
 function compileSource (input, callback) {
-  solc.loadRemoteVersion(SOLC_VERSION, function(e, correctSolc) {
-    if (e) {
-      throw new Error('Could not load correct solc version', e)
-    }
-    let output = correctSolc.compile({sources: input}, 1)
-    callback(null, output)
+  return new Promise((resolve, reject) => {
+    solc.loadRemoteVersion(SOLC_VERSION, cowrap(function*(e, correctSolc) {
+      if (e) {
+        throw new Error('Could not load correct solc version', e)
+      }
+      let output = correctSolc.compile({sources: input}, 1)
+      resolve(output)
+    }))
   })
 }
 
@@ -29,15 +31,7 @@ let main = co(function*() {
     'deps/ERC20TokenInterface.sol': getContractContents(trustcoinDepPath)
   }
 
-  let compiledOutput = yield new Promise((resolve, reject) => {
-    compileSource(compilerInput, (e, output) => {
-      if (e) {
-        reject(e)
-        return
-      }
-      resolve(output)
-    })
-  })
+  let compiledOutput = yield compileSource(compilerInput)
   let contractOutput = compiledOutput.contracts.Trustcoin
   let trustcoinContractAbi = JSON.parse(contractOutput.interface);
   return {abi: trustcoinContractAbi, bytecode: contractOutput.bytecode};
