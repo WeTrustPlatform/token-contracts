@@ -1,6 +1,6 @@
 {
   "name": "wetrust-trst-contract",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "WeTrust's TRST token contract",
   "main": "index.js",
   "directories": {
@@ -25,7 +25,9 @@
   },
   "homepage": "https://github.com/WeTrustPlatform/token-contracts#readme",
   "dependencies": {
-    "eslint": "^3.18.0"
+    "bignumber": "^1.1.0",
+    "eslint": "^3.18.0",
+    "solc": "^0.4.10"
   },
   "devDependencies": {
     "ethereumjs-testrpc": "^3.0.3",
